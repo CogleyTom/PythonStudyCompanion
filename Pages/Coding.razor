@@ -1,0 +1,240 @@
+@page "/practice/coding"
+@using System.Text.Json
+@using PythonStudyCompanion.Models
+@using PythonStudyCompanion.Services
+@inject PracticeService Content
+@inject ProgressService Tracker
+
+<PageTitle>Coding Exercises | Python Study Companion</PageTitle>
+
+<section class="page-heading">
+    <a class="back-link" href="practice">&larr; Practice</a>
+    <p class="eyebrow">THINK FIRST. REVEAL WHEN YOU'RE READY.</p>
+    <h1>Coding exercises</h1>
+    <p>Work it out on paper or in your editor. This app doesn't run Python.</p>
+</section>
+
+@if (isLoading)
+{
+    <p role="status">Loading exercises...</p>
+}
+else if (loadError is not null)
+{
+    <section class="empty-state">
+        <h2>Exercises couldn't be loaded.</h2>
+        <p role="alert">@loadError</p>
+        <button type="button" class="button" @onclick="LoadAsync">Try again</button>
+    </section>
+}
+else if (exercises.Count == 0)
+{
+    <section class="empty-state">
+        <h2>No exercises yet.</h2>
+        <p>Add exercises to wwwroot\data\coding-exercises.json to get started.</p>
+        <button type="button" class="button" @onclick="LoadAsync">Reload exercises</button>
+    </section>
+}
+else if (selectedExercise is null)
+{
+    var filtered = FilteredExercises;
+    <section aria-labelledby="exercises-heading">
+        <h2 id="exercises-heading" tabindex="-1" @ref="contentHeading">Find your next challenge</h2>
+        <p class="section-description">Start with Easy. When a topic becomes Confident on Progress, try a Medium exercise.</p>
+        <div class="session-options">
+            <label class="session-length">
+                Topic
+                <select @bind="selectedTopic">
+                    <option value="">All topics</option>
+                    @foreach (var topic in exercises.Select(exercise => exercise.Topic).Distinct())
+                    {
+                        <option value="@topic">@topic</option>
+                    }
+                </select>
+            </label>
+            <label class="session-length">
+                Difficulty
+                <select @bind="selectedDifficulty">
+                    <option value="">All levels</option>
+                    <option value="Easy">Easy</option>
+                    <option value="Medium">Medium</option>
+                    <option value="Hard">Hard</option>
+                </select>
+            </label>
+        </div>
+        <p class="section-description" role="status">@filtered.Count exercises available</p>
+        @if (filtered.Count == 0)
+        {
+            <div class="empty-state">
+                <h3>No matching exercises.</h3>
+                <p>Try a different topic or difficulty.</p>
+                <button type="button" class="button button-secondary" @onclick="ClearFilters">Clear filters</button>
+            </div>
+        }
+        else
+        {
+            <div class="action-grid">
+                @foreach (var exercise in filtered)
+                {
+                    <button type="button" class="action-card exercise-option" @onclick="() => OpenExercise(exercise)">
+                        <span class="pill">@exercise.Difficulty</span>
+                        <span class="exercise-title">@exercise.Title</span>
+                        <span class="exercise-topic">@exercise.Topic</span>
+                        @if (Tracker.IsExerciseReviewedToday(exercise.Id))
+                        {
+                            <span class="pill">REVIEWED TODAY</span>
+                        }
+                        <span class="text-link">Think it through &rarr;</span>
+                    </button>
+                }
+            </div>
+        }
+    </section>
+}
+else
+{
+    var exercise = selectedExercise;
+    <article class="study-session exercise-detail" aria-labelledby="exercise-heading">
+        <div class="section-heading">
+            <span class="pill">@exercise.Difficulty</span>
+            <button type="button" class="button button-secondary" @onclick="BackToExercises">&larr; Exercises</button>
+        </div>
+        <p class="card-topic">@exercise.Topic</p>
+        <h2 id="exercise-heading" tabindex="-1" @ref="contentHeading">@exercise.Title</h2>
+        <p class="problem-description">@exercise.Description</p>
+        <section class="exercise-example" aria-labelledby="example-heading">
+            <h3 id="example-heading">Example input</h3>
+            <pre class="code-block" tabindex="0" aria-label="Example input"><code>@exercise.ExampleInput</code></pre>
+            <h3>Expected output</h3>
+            <pre class="code-block" tabindex="0" aria-label="Expected output"><code>@exercise.ExpectedOutput</code></pre>
+        </section>
+        <section class="exercise-hints" aria-labelledby="hints-heading">
+            <h3 id="hints-heading">Need a nudge?</h3>
+            <ol id="exercise-hints" class="hint-list" aria-live="polite">
+                @foreach (var hint in exercise.Hints.Take(revealedHints))
+                {
+                    <li>@hint</li>
+                }
+            </ol>
+            <button type="button" class="button button-secondary" disabled="@(revealedHints == exercise.Hints.Length)"
+                    aria-controls="exercise-hints" @onclick="RevealHint">
+                @(revealedHints == exercise.Hints.Length ? "All hints revealed" : $"Show hint {revealedHints + 1} of {exercise.Hints.Length}")
+            </button>
+        </section>
+        <section class="exercise-solution" aria-labelledby="solution-heading">
+            <h3 id="solution-heading">Compare your approach</h3>
+            <p class="section-description">Try outlining a solution before looking. There may be more than one good approach.</p>
+            <button type="button" class="button" aria-controls="reference-solution"
+                    aria-expanded="@showSolution.ToString().ToLowerInvariant()" @onclick="() => showSolution = !showSolution">
+                @(showSolution ? "Hide solution" : "Reveal solution")
+            </button>
+            <div id="reference-solution" hidden="@(!showSolution)">
+                <pre class="code-block" tabindex="0" aria-label="Python solution"><code>@exercise.Solution</code></pre>
+                <h3>How it works</h3>
+                <p class="solution-explanation">@exercise.Explanation</p>
+                <button type="button" class="button button-secondary" disabled="@(isSaving || Tracker.IsExerciseReviewedToday(exercise.Id))"
+                        @onclick="MarkReviewed">
+                    @(Tracker.IsExerciseReviewedToday(exercise.Id) ? "Reviewed today" : "Mark reviewed")
+                </button>
+                <p class="storage-notice">Counts once per exercise per day as study activity, not as a correct answer.</p>
+                @if (Tracker.Error is not null)
+                {
+                    <p class="save-error" role="alert">@Tracker.Error</p>
+                }
+            </div>
+        </section>
+    </article>
+}
+
+@code {
+    private IReadOnlyList<CodingExercise> exercises = [];
+    private CodingExercise? selectedExercise;
+    private string selectedTopic = "";
+    private string selectedDifficulty = "";
+    private int revealedHints;
+    private bool showSolution;
+    private bool isLoading = true;
+    private bool isSaving;
+    private string? loadError;
+    private ElementReference contentHeading;
+    private bool focusHeading;
+
+    private List<CodingExercise> FilteredExercises => exercises.Where(exercise =>
+        (selectedTopic.Length == 0 || exercise.Topic == selectedTopic) &&
+        (selectedDifficulty.Length == 0 || exercise.Difficulty == selectedDifficulty))
+        .OrderBy(exercise => exercise.Difficulty == "Easy" ? 0 : exercise.Difficulty == "Medium" ? 1 : 2).ToList();
+
+    protected override Task OnInitializedAsync() => LoadAsync();
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (focusHeading)
+        {
+            focusHeading = false;
+            await contentHeading.FocusAsync();
+        }
+    }
+
+    private async Task LoadAsync()
+    {
+        isLoading = true;
+        loadError = null;
+        try
+        {
+            await Tracker.InitializeAsync();
+            exercises = await Content.LoadCodingExercisesAsync();
+        }
+        catch (Exception exception) when (exception is HttpRequestException or JsonException or OperationCanceledException)
+        {
+            loadError = "Check your connection or the format of wwwroot\\data\\coding-exercises.json, then try again.";
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private void ClearFilters()
+    {
+        selectedTopic = "";
+        selectedDifficulty = "";
+    }
+
+    private void OpenExercise(CodingExercise exercise)
+    {
+        selectedExercise = exercise;
+        revealedHints = 0;
+        showSolution = false;
+        focusHeading = true;
+    }
+
+    private void RevealHint()
+    {
+        if (selectedExercise is not null && revealedHints < selectedExercise.Hints.Length)
+        {
+            revealedHints++;
+        }
+    }
+
+    private void BackToExercises()
+    {
+        selectedExercise = null;
+        focusHeading = true;
+    }
+
+    private async Task MarkReviewed()
+    {
+        if (isSaving || selectedExercise is null || !showSolution)
+        {
+            return;
+        }
+        isSaving = true;
+        try
+        {
+            await Tracker.RecordExerciseAsync(selectedExercise);
+        }
+        finally
+        {
+            isSaving = false;
+        }
+    }
+}

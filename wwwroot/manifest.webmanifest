@@ -1,0 +1,24 @@
+{
+  "name": "Python Study Companion",
+  "short_name": "Python Study",
+  "description": "Short Python study sessions and technical interview practice.",
+  "id": "./",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f6f7f4",
+  "theme_color": "#194d3d",
+  "prefer_related_applications": false,
+  "icons": [
+    {
+      "src": "icon-512.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    },
+    {
+      "src": "icon-192.png",
+      "type": "image/png",
+      "sizes": "192x192"
+    }
+  ]
+}

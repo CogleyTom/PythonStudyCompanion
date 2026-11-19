@@ -1,0 +1,194 @@
+[
+  {
+    "id": "fundamentals-variables",
+    "topic": "Python Fundamentals",
+    "front": "What does this code print?\n\nscore = 4\nscore = score + 3\nprint(score)",
+    "back": "7\n\nAssignment binds a name to a value. The second assignment calculates 4 + 3, then binds score to 7."
+  },
+  {
+    "id": "fundamentals-comparison",
+    "topic": "Python Fundamentals",
+    "front": "What is the difference between = and == in Python?",
+    "back": "= assigns a value to a target, such as a variable name.\n== compares two values for equality and usually produces True or False.\n\ncount = 3\ncount == 3  # True"
+  },
+  {
+    "id": "fundamentals-truthiness",
+    "topic": "Python Fundamentals",
+    "front": "Is an empty list truthy or falsy? What does this code print?\n\nitems = []\nif not items:\n    print('Empty')",
+    "back": "An empty list is falsy, so the code prints Empty.\n\nNone, False, numeric zero, and empty built-in containers are also falsy."
+  },
+  {
+    "id": "fundamentals-range",
+    "topic": "Python Fundamentals",
+    "front": "Which numbers does list(range(1, 5)) contain?",
+    "back": "[1, 2, 3, 4]\n\nrange includes the start but excludes the stop. Its default step is 1."
+  },
+  {
+    "id": "functions-return",
+    "topic": "Python Functions",
+    "front": "How do return and print differ inside a function?",
+    "back": "return sends a value back to the caller and exits that function call.\nprint writes text to an output stream. Printing a value does not return it from the surrounding function."
+  },
+  {
+    "id": "functions-none",
+    "topic": "Python Functions",
+    "front": "What does a Python function return if it reaches its end without a return statement?",
+    "back": "None.\n\nA bare return also returns None. This is different from returning an empty string, zero, or False."
+  },
+  {
+    "id": "functions-defaults",
+    "topic": "Python Functions",
+    "front": "Why can a default parameter such as items=[] cause surprising behavior?",
+    "back": "The default list is created when the function is defined, not on every call. Calls that omit items share that list.\n\nUse a None default and create a new list inside the function when items is None."
+  },
+  {
+    "id": "functions-keywords",
+    "topic": "Python Functions",
+    "front": "What does this call return?\n\ndef greet(name, prefix='Hello'):\n    return f'{prefix}, {name}'\n\ngreet('Sam', prefix='Hi')",
+    "back": "'Hi, Sam'\n\nname receives the positional argument 'Sam'. The keyword argument prefix='Hi' overrides the default."
+  },
+  {
+    "id": "collections-list-tuple",
+    "topic": "Lists, Tuples, Sets, and Dictionaries",
+    "front": "What is the main difference between a list and a tuple?",
+    "back": "A list is mutable: you can add, remove, or replace its elements.\nA tuple is immutable: its element references cannot be replaced after creation.\n\nA mutable object stored inside a tuple can still change."
+  },
+  {
+    "id": "collections-set",
+    "topic": "Lists, Tuples, Sets, and Dictionaries",
+    "front": "When would you use a set instead of a list?",
+    "back": "Use a set for unique, hashable elements and fast membership checks. Sets do not promise an iteration order.\n\nUse a list when you need an ordered sequence, indexing, or duplicate elements."
+  },
+  {
+    "id": "collections-dictionary",
+    "topic": "Lists, Tuples, Sets, and Dictionaries",
+    "front": "How do scores['Sam'] and scores.get('Sam', 0) differ when 'Sam' is missing?",
+    "back": "scores['Sam'] raises KeyError in a regular dictionary.\nscores.get('Sam', 0) returns 0 instead and does not add the missing key."
+  },
+  {
+    "id": "collections-alias",
+    "topic": "Lists, Tuples, Sets, and Dictionaries",
+    "front": "What does this print?\n\na = [1, 2]\nb = a\nb.append(3)\nprint(a)",
+    "back": "[1, 2, 3]\n\na and b refer to the same list. Assignment does not copy it. Use a.copy() for a shallow copy when that is what you need."
+  },
+  {
+    "id": "oop-class-instance",
+    "topic": "Object-Oriented Programming",
+    "front": "How does a class differ from an instance?",
+    "back": "A class defines a type's behavior and structure. An instance is a particular object of that class.\n\nIf Dog is a class, pet = Dog() creates an instance referenced by pet."
+  },
+  {
+    "id": "oop-self",
+    "topic": "Object-Oriented Programming",
+    "front": "What does self represent in a typical Python instance method?",
+    "back": "self refers to the instance receiving the method call. Python supplies it when a bound method is called.\n\nself is a naming convention, not a reserved keyword."
+  },
+  {
+    "id": "oop-init",
+    "topic": "Object-Oriented Programming",
+    "front": "What is the purpose of __init__?",
+    "back": "__init__ initializes an instance after it has been created, often by assigning attributes such as self.name.\n\nIt must not return a value other than None."
+  },
+  {
+    "id": "oop-inheritance",
+    "topic": "Object-Oriented Programming",
+    "front": "What does inheritance let a subclass do?",
+    "back": "A subclass can reuse and extend behavior from a base class. It can override a method to provide different behavior.\n\nUse inheritance for a meaningful is-a relationship, not just to avoid repeating code."
+  },
+  {
+    "id": "structures-stack",
+    "topic": "Data Structures",
+    "front": "What does LIFO mean, and how can a Python list act as a stack?",
+    "back": "Last In, First Out: the most recently added item is removed first.\n\nUse items.append(value) to push and items.pop() to remove the last item. Popping an empty list raises IndexError."
+  },
+  {
+    "id": "structures-queue",
+    "topic": "Data Structures",
+    "front": "What does FIFO mean, and which standard-library container is useful for a queue?",
+    "back": "First In, First Out: the earliest added item is removed first.\n\ncollections.deque supports append() to add at the right and popleft() to remove from the left efficiently."
+  },
+  {
+    "id": "structures-hash-map",
+    "topic": "Data Structures",
+    "front": "Which Python built-in is a hash map, and what does it store?",
+    "back": "dict is Python's built-in hash map. It maps unique, hashable keys to values.\n\nFor example, {'Sam': 3} maps the string 'Sam' to the integer 3."
+  },
+  {
+    "id": "structures-tree",
+    "topic": "Data Structures",
+    "front": "What is a leaf in a tree data structure?",
+    "back": "A leaf is a node with no children.\n\nThe root is the top node. A tree with just one node has a root that is also a leaf."
+  },
+  {
+    "id": "algorithms-linear-search",
+    "topic": "Algorithms and Coding Patterns",
+    "front": "How does linear search find a target?",
+    "back": "It checks elements one by one until it finds the target or reaches the end.\n\nIt works on unsorted data. In the worst case it inspects all n elements."
+  },
+  {
+    "id": "algorithms-binary-search",
+    "topic": "Algorithms and Coding Patterns",
+    "front": "What key requirement does binary search have, and how does it narrow the search?",
+    "back": "The searchable range must be sorted according to the comparison being used.\n\nCompare the target with the middle element, then discard the half that cannot contain it. Repeat on the remaining range."
+  },
+  {
+    "id": "algorithms-two-pointers",
+    "topic": "Algorithms and Coding Patterns",
+    "front": "How can two pointers check whether a string is a palindrome?",
+    "back": "Place one pointer at each end. Compare those characters, then move both pointers inward.\n\nA mismatch means it is not a palindrome. If the pointers meet or cross without a mismatch, it is."
+  },
+  {
+    "id": "algorithms-base-case",
+    "topic": "Algorithms and Coding Patterns",
+    "front": "Why does a recursive function need a base case?",
+    "back": "A base case supplies an answer without making another recursive call. Recursive steps must move toward it.\n\nWithout a reachable stopping condition, recursion can continue until Python raises RecursionError."
+  },
+  {
+    "id": "complexity-meaning",
+    "topic": "Big O Complexity",
+    "front": "What does Big O describe?",
+    "back": "Big O describes an asymptotic upper bound on how a resource requirement grows as input size grows.\n\nFor interview analysis, name the resource (time or space) and the case you mean, such as worst-case running time."
+  },
+  {
+    "id": "complexity-linear",
+    "topic": "Big O Complexity",
+    "front": "What is the time complexity of one loop that visits n items once, doing constant work per item?",
+    "back": "O(n) time.\n\nThe work grows in proportion to the number of items. Doubling n roughly doubles the repeated work under these assumptions."
+  },
+  {
+    "id": "complexity-nested",
+    "topic": "Big O Complexity",
+    "front": "What is the time complexity of two nested loops when each runs n times and the inner body does constant work?",
+    "back": "O(n squared), also written O(n^2).\n\nThe inner body runs n times for each of the n outer iterations, for n * n total executions."
+  },
+  {
+    "id": "complexity-space",
+    "topic": "Big O Complexity",
+    "front": "What is the auxiliary space complexity of copying n list references into a new list?",
+    "back": "O(n) auxiliary space.\n\nThe new list needs storage proportional to n. A shallow copy copies references; it does not recursively copy the referenced objects."
+  },
+  {
+    "id": "interview-clarify",
+    "topic": "Technical Interview Questions",
+    "front": "What should you clarify before coding an interview solution?",
+    "back": "Confirm the input and output, constraints, allowed operations, and edge cases.\n\nWalk through a small example and state assumptions instead of silently guessing."
+  },
+  {
+    "id": "interview-explain",
+    "topic": "Technical Interview Questions",
+    "front": "How should you explain an approach before writing code?",
+    "back": "Describe a straightforward correct solution first. State its time and space costs, then explain any improvement and its trade-offs.\n\nUse a small example to make the reasoning concrete."
+  },
+  {
+    "id": "interview-edge-cases",
+    "topic": "Technical Interview Questions",
+    "front": "Which edge cases are worth considering for a sequence-processing problem?",
+    "back": "Consider an empty input, one element, duplicate values, and boundary positions.\n\nDepending on the problem, also check negative values, already sorted inputs, and a target that is absent."
+  },
+  {
+    "id": "interview-testing",
+    "topic": "Technical Interview Questions",
+    "front": "How can you check an interview solution without running it?",
+    "back": "Trace the variables through a typical example and a boundary case. Check loop bounds, termination, and the final returned value.\n\nCompare the result with the problem's expected behavior and revisit the complexity analysis."
+  }
+]

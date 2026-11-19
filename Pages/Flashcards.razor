@@ -1,0 +1,341 @@
+@page "/flashcards"
+@using System.Text.Json
+@using PythonStudyCompanion.Models
+@using PythonStudyCompanion.Services
+@inject FlashcardService Content
+@inject ProgressService Tracker
+
+<PageTitle>Flashcards | Python Study Companion</PageTitle>
+
+<section class="page-heading">
+    <p class="eyebrow">RECALL. REPEAT. REMEMBER.</p>
+    <h1>Flashcards</h1>
+    <p>A little repetition goes a long way.</p>
+</section>
+
+@if (isLoading)
+{
+    <p role="status">Loading your decks...</p>
+}
+else if (loadError is not null)
+{
+    <section class="empty-state" aria-labelledby="load-error-heading">
+        <h2 id="load-error-heading">Your decks couldn't be loaded.</h2>
+        <p role="alert">@loadError</p>
+        <button type="button" class="button" @onclick="LoadAsync">Try again</button>
+    </section>
+}
+else if (cards.Count == 0)
+{
+    <section class="empty-state">
+        <h2>No cards yet.</h2>
+        <p>Add cards to wwwroot\data\flashcards.json to create your first deck.</p>
+        <button type="button" class="button" @onclick="LoadAsync">Reload decks</button>
+    </section>
+}
+else if (session.Count == 0)
+{
+    <section aria-labelledby="decks-heading">
+        <div class="section-heading">
+            <h2 id="decks-heading">Choose your focus</h2>
+            <span class="muted">@cards.Count beginner cards</span>
+        </div>
+        <p class="section-description">Choose one or more topics. Due misses come first, followed by other due cards and new cards.</p>
+        <fieldset class="deck-picker">
+            <legend class="sr-only">Study topics</legend>
+            @foreach (var deck in cards.GroupBy(card => card.Topic))
+            {
+                <label class="deck-option">
+                    <input type="checkbox" checked="@selectedTopics.Contains(deck.Key)"
+                           @onchange="() => ToggleTopic(deck.Key)" />
+                    <span><strong>@deck.Key</strong><span class="muted">@deck.Count(card => Tracker.IsCardDue(card.Id)) due or new &middot; @deck.Count() total</span></span>
+                </label>
+            }
+        </fieldset>
+        <div class="session-options">
+            <label class="session-length">
+                Session size
+                <select @bind="sessionSize">
+                    <option value="5">Up to 5 cards</option>
+                    <option value="10">Up to 10 cards</option>
+                    <option value="15">Up to 15 cards</option>
+                </select>
+            </label>
+            <label class="shuffle-option">
+                <input type="checkbox" @bind="shuffle" />
+                Shuffle within priorities
+            </label>
+            <label class="shuffle-option">
+                <input type="checkbox" @bind="dueOnly" />
+                Due and new cards only
+            </label>
+        </div>
+        @if (SelectedCardCount == 0)
+        {
+            <p class="storage-notice">No eligible cards in the selected topics. Choose more topics or turn off the due-only filter to practice ahead.</p>
+        }
+        <div class="study-toolbar">
+            <button type="button" class="button" disabled="@(SelectedCardCount == 0)" @onclick="StartSession">
+                Study @Math.Min(sessionSize, SelectedCardCount) cards <span aria-hidden="true">&rarr;</span>
+            </button>
+            <span class="muted" role="status">@selectedTopics.Count topics selected</span>
+        </div>
+    </section>
+}
+else if (IsComplete)
+{
+    <section class="empty-state session-summary" aria-labelledby="summary-heading">
+        <span class="pill">SESSION COMPLETE</span>
+        <h2 id="summary-heading" tabindex="-1" @ref="summaryHeading">Small steps. Real progress.</h2>
+        <p>You rated all @session.Count cards. These are your self-assessed results for this round.</p>
+        <dl class="rating-summary">
+            <div><dt>Again</dt><dd>@CountRating(AnswerRating.Again)</dd></div>
+            <div><dt>Good</dt><dd>@CountRating(AnswerRating.Good)</dd></div>
+            <div><dt>Easy</dt><dd>@CountRating(AnswerRating.Easy)</dd></div>
+        </dl>
+        <p><strong>@RememberedCount remembered</strong> &middot; @CountRating(AnswerRating.Again) to revisit</p>
+        <div class="study-toolbar">
+            @if (CountRating(AnswerRating.Again) > 0)
+            {
+                <button type="button" class="button" @onclick="ReviewMissed">Review Again cards</button>
+            }
+            <button type="button" class="button button-secondary" @onclick="ChooseDecks">Choose decks</button>
+        </div>
+    </section>
+}
+else
+{
+    var card = session[currentIndex];
+    <section class="study-session" aria-labelledby="session-heading">
+        <div class="section-heading">
+            <h2 id="session-heading">Your study session</h2>
+            <button type="button" class="button button-secondary" disabled="@isSaving" @onclick="ChooseDecks">End session</button>
+        </div>
+        <div class="section-heading session-status">
+            <span>Card @(currentIndex + 1) of @session.Count</span>
+            <span role="status">@ratings.Count of @session.Count rated</span>
+        </div>
+        <progress value="@ratings.Count" max="@session.Count" aria-label="Cards rated this session"></progress>
+        <p class="card-topic">@card.Topic <span class="pill">BEGINNER</span></p>
+
+        <button type="button" class="flashcard @(isFlipped ? "is-flipped" : null)"
+                aria-label="@(isFlipped ? "Answer. " + card.Back + " Tap to show question." : "Question. " + card.Front + " Tap to reveal answer.")"
+                aria-pressed="@isFlipped.ToString().ToLowerInvariant()" disabled="@isSaving" @onclick="Flip" @ref="cardButton">
+            <span class="flashcard-inner" @key="card.Id">
+                <span class="flashcard-face flashcard-front" aria-hidden="true">
+                    <span class="eyebrow">THINK IT THROUGH</span>
+                    <span class="flashcard-text">@card.Front</span>
+                    <span class="muted">Tap to reveal the answer</span>
+                </span>
+                <span class="flashcard-face flashcard-back" aria-hidden="true">
+                    <span class="eyebrow">THE ANSWER</span>
+                    <span class="flashcard-text">@card.Back</span>
+                    <span class="muted">Tap to see the question</span>
+                </span>
+            </span>
+        </button>
+
+        <div class="card-navigation" aria-label="Card navigation">
+            <button type="button" class="button button-secondary" disabled="@(isSaving || currentIndex == 0)"
+                    @onclick="() => MoveCard(-1)">&larr; Previous</button>
+            <button type="button" class="button button-secondary" disabled="@(isSaving || currentIndex == session.Count - 1)"
+                    @onclick="() => MoveCard(1)">Next &rarr;</button>
+        </div>
+
+        <p id="rating-help" class="rating-help">
+            @(isFlipped ? "How well did you remember? Again means missed; Good or Easy means remembered." : "Reveal the answer before rating. Navigation alone doesn't rate a card.")
+        </p>
+        <div class="rating-buttons" role="group" aria-label="Rate your recall" aria-describedby="rating-help">
+            @foreach (var rating in new[] { AnswerRating.Again, AnswerRating.Good, AnswerRating.Easy })
+            {
+                <button type="button" class="button button-secondary"
+                        disabled="@(isSaving || !isFlipped)"
+                        aria-pressed="@((ratings.GetValueOrDefault(card.Id) == rating && ratings.ContainsKey(card.Id)).ToString().ToLowerInvariant())"
+                        @onclick="() => Rate(rating)">
+                    @rating
+                </button>
+            }
+        </div>
+        @if (Tracker.Error is not null)
+        {
+            <p class="save-error" role="alert">@Tracker.Error Your rating has not advanced; try again after resolving storage.</p>
+        }
+        <p class="muted session-totals" role="status">
+            @RememberedCount remembered &middot; @CountRating(AnswerRating.Again) to revisit
+            @if (ratings.TryGetValue(card.Id, out var previousRating))
+            {
+                <span> &middot; This card: @previousRating</span>
+            }
+        </p>
+    </section>
+}
+
+<p class="storage-notice">Ratings save on this device before advancing. Again schedules 10 minutes; Good starts at 1 day and Easy at 3 days. Review missed cards now, or return when they are due.</p>
+
+@code {
+    private IReadOnlyList<Flashcard> cards = [];
+    private readonly HashSet<string> selectedTopics = new(StringComparer.Ordinal);
+    private List<Flashcard> session = [];
+    private readonly Dictionary<string, AnswerRating> ratings = new(StringComparer.Ordinal);
+    private Guid sessionId;
+    private int currentIndex;
+    private int sessionSize = 10;
+    private bool shuffle;
+    private bool dueOnly = true;
+    private bool isSaving;
+    private bool isFlipped;
+    private bool isLoading = true;
+    private string? loadError;
+    private ElementReference cardButton;
+    private ElementReference summaryHeading;
+    private bool focusCard;
+    private bool focusSummary;
+
+    private IEnumerable<Flashcard> EligibleCards => cards.Where(card => selectedTopics.Contains(card.Topic)
+        && (!dueOnly || Tracker.IsCardDue(card.Id)));
+    private int SelectedCardCount => EligibleCards.Count();
+    private bool IsComplete => session.Count > 0 && ratings.Count == session.Count;
+    private int RememberedCount => ratings.Count - CountRating(AnswerRating.Again);
+
+    protected override Task OnInitializedAsync() => LoadAsync();
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (focusSummary)
+        {
+            focusSummary = false;
+            await summaryHeading.FocusAsync();
+        }
+        else if (focusCard)
+        {
+            focusCard = false;
+            await cardButton.FocusAsync();
+        }
+    }
+
+    private async Task LoadAsync()
+    {
+        isLoading = true;
+        loadError = null;
+        try
+        {
+            await Tracker.InitializeAsync();
+            cards = await Content.LoadAsync();
+            selectedTopics.Clear();
+            if (cards.Count > 0)
+            {
+                selectedTopics.Add(cards[0].Topic);
+            }
+        }
+        catch (Exception exception) when (exception is HttpRequestException or JsonException or OperationCanceledException)
+        {
+            loadError = "Check your connection or the format of wwwroot\\data\\flashcards.json, then try again.";
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private void ToggleTopic(string topic)
+    {
+        if (!selectedTopics.Add(topic))
+        {
+            selectedTopics.Remove(topic);
+        }
+    }
+
+    private void StartSession()
+    {
+        var selected = new List<Flashcard>();
+        foreach (var priority in EligibleCards.GroupBy(card => Tracker.CardPriority(card.Id)).OrderBy(group => group.Key))
+        {
+            var group = priority.OrderBy(card => Tracker.GetCardSchedule(card.Id)?.DueAt).ToArray();
+            if (shuffle)
+            {
+                Random.Shared.Shuffle(group);
+            }
+            selected.AddRange(group);
+        }
+        BeginRound(selected.Take(sessionSize));
+    }
+
+    private void BeginRound(IEnumerable<Flashcard> selected)
+    {
+        session = selected.ToList();
+        sessionId = Guid.NewGuid();
+        ratings.Clear();
+        currentIndex = 0;
+        isFlipped = false;
+        focusCard = session.Count > 0;
+    }
+
+    private void Flip() => isFlipped = !isFlipped;
+
+    private void MoveCard(int offset)
+    {
+        var next = currentIndex + offset;
+        if (next < 0 || next >= session.Count)
+        {
+            return;
+        }
+
+        currentIndex = next;
+        isFlipped = false;
+        focusCard = true;
+    }
+
+    private async Task Rate(AnswerRating rating)
+    {
+        if (isSaving || !isFlipped || IsComplete)
+        {
+            return;
+        }
+
+        isSaving = true;
+        try
+        {
+            if (!await Tracker.RecordCardAsync(sessionId, session[currentIndex], rating))
+            {
+                return;
+            }
+        }
+        finally
+        {
+            isSaving = false;
+        }
+        ratings[session[currentIndex].Id] = rating;
+        isFlipped = false;
+        if (IsComplete)
+        {
+            focusSummary = true;
+            return;
+        }
+
+        for (var offset = 1; offset <= session.Count; offset++)
+        {
+            var next = (currentIndex + offset) % session.Count;
+            if (!ratings.ContainsKey(session[next].Id))
+            {
+                currentIndex = next;
+                break;
+            }
+        }
+        focusCard = true;
+    }
+
+    private int CountRating(AnswerRating rating) => ratings.Values.Count(value => value == rating);
+
+    private void ReviewMissed()
+    {
+        var missed = session.Where(card => ratings[card.Id] == AnswerRating.Again).ToList();
+        BeginRound(missed);
+    }
+
+    private void ChooseDecks()
+    {
+        session.Clear();
+        ratings.Clear();
+        isFlipped = false;
+    }
+}

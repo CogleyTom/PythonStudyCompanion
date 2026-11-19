@@ -1,0 +1,325 @@
+@page "/practice/quiz"
+@using System.Text.Json
+@using PythonStudyCompanion.Models
+@using PythonStudyCompanion.Services
+@inject PracticeService Content
+@inject ProgressService Tracker
+
+<PageTitle>Quiz | Python Study Companion</PageTitle>
+
+<section class="page-heading">
+    <a class="back-link" href="practice">&larr; Practice</a>
+    <p class="eyebrow">A QUICK CHECK. A STRONGER FOUNDATION.</p>
+    <h1>Quick quiz</h1>
+    <p>Choose an answer, learn why, and keep building.</p>
+</section>
+
+@if (isLoading)
+{
+    <p role="status">Loading quiz questions...</p>
+}
+else if (loadError is not null)
+{
+    <section class="empty-state">
+        <h2>Questions couldn't be loaded.</h2>
+        <p role="alert">@loadError</p>
+        <button type="button" class="button" @onclick="LoadAsync">Try again</button>
+    </section>
+}
+else if (questions.Count == 0)
+{
+    <section class="empty-state">
+        <h2>No questions yet.</h2>
+        <p>Add questions to wwwroot\data\quizzes.json to create your first quiz.</p>
+        <button type="button" class="button" @onclick="LoadAsync">Reload questions</button>
+    </section>
+}
+else if (session.Count == 0)
+{
+    <section aria-labelledby="topics-heading">
+        <div class="section-heading">
+            <h2 id="topics-heading" tabindex="-1" @ref="contentHeading">Choose your topics</h2>
+            <span class="muted">@questions.Count beginner questions</span>
+        </div>
+        <p class="section-description">Previously missed questions come first, then new ones. Topics rotate within each priority. Select one topic or mix several.</p>
+        <fieldset class="deck-picker">
+            <legend class="sr-only">Quiz topics</legend>
+            @foreach (var topic in questions.GroupBy(question => question.Topic))
+            {
+                <label class="deck-option">
+                    <input type="checkbox" checked="@selectedTopics.Contains(topic.Key)"
+                           @onchange="() => ToggleTopic(topic.Key)" />
+                    <span><strong>@topic.Key</strong><span class="muted">@topic.Count() questions</span></span>
+                </label>
+            }
+        </fieldset>
+        <div class="session-options">
+            <label class="session-length">
+                Session size
+                <select @bind="sessionSize">
+                    <option value="5">5 questions</option>
+                    <option value="10">10 questions</option>
+                    <option value="15">15 questions</option>
+                </select>
+            </label>
+            <p class="muted" role="status">@SelectedQuestionCount questions available. This round: @Math.Min(sessionSize, SelectedQuestionCount).</p>
+        </div>
+        <button type="button" class="button" disabled="@(SelectedQuestionCount == 0)" @onclick="StartQuiz">Start quiz</button>
+    </section>
+}
+else if (showSummary)
+{
+    <section class="empty-state session-summary quiz-summary" aria-labelledby="summary-heading">
+        <span class="pill">@(isRetry ? "REVIEW ROUND COMPLETE" : "QUIZ COMPLETE")</span>
+        <h2 id="summary-heading" tabindex="-1" @ref="contentHeading">Keep the learning going.</h2>
+        <p>Your score for this round. Reviewing missed questions starts a fresh round without changing this score.</p>
+        <dl class="rating-summary">
+            <div><dt>Correct</dt><dd>@CorrectCount</dd></div>
+            <div><dt>Incorrect</dt><dd>@(session.Count - CorrectCount)</dd></div>
+            <div><dt>Accuracy</dt><dd>@Accuracy%</dd></div>
+        </dl>
+        @if (CorrectCount < session.Count)
+        {
+            <h3>Review missed questions</h3>
+            <div class="missed-questions">
+                @for (var index = 0; index < session.Count; index++)
+                {
+                    var question = session[index];
+                    if (answers[index] != question.CorrectAnswerIndex)
+                    {
+                        <details class="missed-question">
+                            <summary>@question.Question</summary>
+                            <p><strong>Your answer:</strong> @question.Options[answers[index]]</p>
+                            <p><strong>Correct answer:</strong> @question.Options[question.CorrectAnswerIndex]</p>
+                            <p>@question.Explanation</p>
+                        </details>
+                    }
+                }
+            </div>
+        }
+        else
+        {
+            <p>Every answer correct. Nice work!</p>
+        }
+        <div class="study-toolbar">
+            @if (CorrectCount < session.Count)
+            {
+                <button type="button" class="button" @onclick="RetryMissed">Retry missed questions</button>
+            }
+            <button type="button" class="button button-secondary" @onclick="ChooseTopics">Choose topics</button>
+        </div>
+    </section>
+}
+else
+{
+    var question = session[currentIndex];
+    <section class="study-session" aria-labelledby="question-heading">
+        <div class="section-heading">
+            <span class="pill">@(isRetry ? "MISSED-QUESTION ROUND" : "QUIZ SESSION")</span>
+            <button type="button" class="button button-secondary" disabled="@isSaving" @onclick="ChooseTopics">End quiz</button>
+        </div>
+        <div class="section-heading session-status">
+            <span>Question @(currentIndex + 1) of @session.Count</span>
+            <span>@CorrectCount correct &middot; @answers.Count answered</span>
+        </div>
+        <progress value="@answers.Count" max="@session.Count" aria-label="Questions answered this round"></progress>
+        <p class="card-topic">@question.Topic</p>
+        <h2 id="question-heading" class="quiz-question" tabindex="-1" @ref="contentHeading">@question.Question</h2>
+        <div class="quiz-options" role="group" aria-labelledby="question-heading">
+            @for (var index = 0; index < question.Options.Length; index++)
+            {
+                var optionIndex = index;
+                <button type="button" class="quiz-option @AnswerClass(optionIndex)" disabled="@(isSaving || selectedAnswer.HasValue)"
+                        aria-pressed="@((selectedAnswer == optionIndex).ToString().ToLowerInvariant())"
+                        @onclick="() => ChooseAnswer(optionIndex)">
+                    <span class="option-letter" aria-hidden="true">@((char)('A' + optionIndex))</span>
+                    <span class="option-content">
+                        <span>@question.Options[optionIndex]</span>
+                        @if (selectedAnswer.HasValue && optionIndex == question.CorrectAnswerIndex)
+                        {
+                            <strong class="answer-label">Correct answer</strong>
+                        }
+                        @if (selectedAnswer == optionIndex)
+                        {
+                            <strong class="answer-label">Your answer</strong>
+                        }
+                    </span>
+                </button>
+            }
+        </div>
+        @if (selectedAnswer.HasValue)
+        {
+            <section class="answer-feedback @(selectedAnswer == question.CorrectAnswerIndex ? "answer-correct" : "answer-incorrect")" role="status">
+                <h3 tabindex="-1" @ref="feedbackHeading">@(selectedAnswer == question.CorrectAnswerIndex ? "Correct!" : "Not quite. Here's why.")</h3>
+                <p><strong>Correct answer:</strong> @question.Options[question.CorrectAnswerIndex]</p>
+                <p>@question.Explanation</p>
+            </section>
+        }
+        @if (Tracker.Error is not null)
+        {
+            <p class="save-error" role="alert">@Tracker.Error Your answer has not been submitted; try again after resolving storage.</p>
+        }
+        <button type="button" class="button quiz-next" disabled="@(isSaving || !selectedAnswer.HasValue)" @onclick="NextQuestion">
+            @(currentIndex == session.Count - 1 ? "View results" : "Next question") <span aria-hidden="true">&rarr;</span>
+        </button>
+    </section>
+}
+
+<p class="storage-notice">Each answer saves on this device, including unfinished rounds. Completed rounds and missed-question retries appear separately in your quiz history.</p>
+
+@code {
+    private IReadOnlyList<QuizQuestion> questions = [];
+    private readonly HashSet<string> selectedTopics = new(StringComparer.Ordinal);
+    private List<QuizQuestion> session = [];
+    private readonly List<int> answers = [];
+    private Guid sessionId;
+    private int sessionSize = 5;
+    private int currentIndex;
+    private int? selectedAnswer;
+    private bool showSummary;
+    private bool isRetry;
+    private bool isSaving;
+    private bool isLoading = true;
+    private string? loadError;
+    private ElementReference contentHeading;
+    private ElementReference feedbackHeading;
+    private bool focusHeading;
+    private bool focusFeedback;
+
+    private int SelectedQuestionCount => questions.Count(question => selectedTopics.Contains(question.Topic));
+    private int CorrectCount => answers.Where((answer, index) => answer == session[index].CorrectAnswerIndex).Count();
+    private int Accuracy => session.Count == 0 ? 0 : (int)Math.Round(100.0 * CorrectCount / session.Count);
+
+    protected override Task OnInitializedAsync() => LoadAsync();
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (focusFeedback)
+        {
+            focusFeedback = false;
+            await feedbackHeading.FocusAsync();
+        }
+        else if (focusHeading)
+        {
+            focusHeading = false;
+            await contentHeading.FocusAsync();
+        }
+    }
+
+    private async Task LoadAsync()
+    {
+        isLoading = true;
+        loadError = null;
+        try
+        {
+            await Tracker.InitializeAsync();
+            questions = await Content.LoadQuizQuestionsAsync();
+            selectedTopics.Clear();
+            selectedTopics.UnionWith(questions.Select(question => question.Topic));
+        }
+        catch (Exception exception) when (exception is HttpRequestException or JsonException or OperationCanceledException)
+        {
+            loadError = "Check your connection or the format of wwwroot\\data\\quizzes.json, then try again.";
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private void ToggleTopic(string topic)
+    {
+        if (!selectedTopics.Add(topic))
+        {
+            selectedTopics.Remove(topic);
+        }
+    }
+
+    private void StartQuiz()
+    {
+        var selected = Tracker.BuildQuiz(questions.Where(question => selectedTopics.Contains(question.Topic)), sessionSize);
+        BeginRound(selected, false);
+    }
+
+    private void BeginRound(List<QuizQuestion> selected, bool retry)
+    {
+        session = selected;
+        sessionId = Guid.NewGuid();
+        answers.Clear();
+        currentIndex = 0;
+        selectedAnswer = null;
+        showSummary = false;
+        isRetry = retry;
+        focusHeading = session.Count > 0;
+    }
+
+    private async Task ChooseAnswer(int index)
+    {
+        if (isSaving || selectedAnswer.HasValue || index < 0 || index >= session[currentIndex].Options.Length)
+        {
+            return;
+        }
+        isSaving = true;
+        try
+        {
+            var question = session[currentIndex];
+            if (!await Tracker.RecordQuizAnswerAsync(sessionId, question, index == question.CorrectAnswerIndex, session.Count, isRetry))
+            {
+                return;
+            }
+        }
+        finally
+        {
+            isSaving = false;
+        }
+        selectedAnswer = index;
+        answers.Add(index);
+        focusFeedback = true;
+    }
+
+    private string AnswerClass(int index)
+    {
+        if (!selectedAnswer.HasValue)
+        {
+            return "";
+        }
+        if (index == session[currentIndex].CorrectAnswerIndex)
+        {
+            return "answer-correct";
+        }
+        return index == selectedAnswer ? "answer-incorrect" : "";
+    }
+
+    private void NextQuestion()
+    {
+        if (!selectedAnswer.HasValue)
+        {
+            return;
+        }
+        if (currentIndex == session.Count - 1)
+        {
+            showSummary = true;
+        }
+        else
+        {
+            currentIndex++;
+            selectedAnswer = null;
+        }
+        focusHeading = true;
+    }
+
+    private void RetryMissed()
+    {
+        var missed = session.Where((question, index) => answers[index] != question.CorrectAnswerIndex).ToList();
+        BeginRound(missed, true);
+    }
+
+    private void ChooseTopics()
+    {
+        session.Clear();
+        answers.Clear();
+        selectedAnswer = null;
+        showSummary = false;
+        focusHeading = true;
+    }
+}

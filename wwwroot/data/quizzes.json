@@ -1,0 +1,322 @@
+[
+  {
+    "id": "quiz-fundamentals-assignment",
+    "topic": "Python Fundamentals",
+    "question": "What does this print?\n\ncount = 3\ncount += 2\nprint(count)",
+    "options": ["3", "2", "5", "32"],
+    "correctAnswerIndex": 2,
+    "explanation": "The += operation adds 2 to the current integer value, then assigns the result back to count."
+  },
+  {
+    "id": "quiz-fundamentals-division",
+    "topic": "Python Fundamentals",
+    "question": "What is the result of 7 // 2?",
+    "options": ["3", "3.5", "4", "1"],
+    "correctAnswerIndex": 0,
+    "explanation": "// performs floor division. With these positive integer operands, 7 // 2 is 3."
+  },
+  {
+    "id": "quiz-fundamentals-range",
+    "topic": "Python Fundamentals",
+    "question": "Which list is produced by list(range(2, 6))?",
+    "options": ["[2, 3, 4, 5, 6]", "[0, 1, 2, 3, 4, 5]", "[3, 4, 5, 6]", "[2, 3, 4, 5]"],
+    "correctAnswerIndex": 3,
+    "explanation": "range includes its starting value and excludes its stopping value, using a step of 1 unless another step is supplied."
+  },
+  {
+    "id": "quiz-fundamentals-boolean",
+    "topic": "Python Fundamentals",
+    "question": "What is bool([])?",
+    "options": ["True", "False", "None", "It raises TypeError"],
+    "correctAnswerIndex": 1,
+    "explanation": "An empty built-in list is falsy, so converting it to bool produces False."
+  },
+  {
+    "id": "quiz-fundamentals-string",
+    "topic": "Python Fundamentals",
+    "question": "What does 'python'[0] evaluate to?",
+    "options": ["'y'", "'python'", "'p'", "0"],
+    "correctAnswerIndex": 2,
+    "explanation": "Sequence indexes start at zero. Index 0 selects the first character, 'p'."
+  },
+  {
+    "id": "quiz-functions-return",
+    "topic": "Python Functions",
+    "question": "What does this function call return?\n\ndef double(number):\n    return number * 2\n\ndouble(4)",
+    "options": ["4", "8", "None", "2"],
+    "correctAnswerIndex": 1,
+    "explanation": "The function multiplies its argument by 2 and returns the result to the caller."
+  },
+  {
+    "id": "quiz-functions-implicit",
+    "topic": "Python Functions",
+    "question": "What value does a function return when it reaches the end without executing a return statement?",
+    "options": ["0", "False", "An empty string", "None"],
+    "correctAnswerIndex": 3,
+    "explanation": "A function that finishes without an explicit return value returns None."
+  },
+  {
+    "id": "quiz-functions-keyword",
+    "topic": "Python Functions",
+    "question": "Which call overrides the default greeting?\n\ndef greet(name, greeting='Hello'):\n    return f'{greeting}, {name}'",
+    "options": ["greet('Sam', greeting='Hi')", "greet('Sam')", "greet()", "greet('Sam', name='Hi')"],
+    "correctAnswerIndex": 0,
+    "explanation": "The greeting keyword explicitly supplies 'Hi'. greet('Sam') keeps the default. The other two calls do not provide valid arguments for this signature."
+  },
+  {
+    "id": "quiz-functions-mutable-default",
+    "topic": "Python Functions",
+    "question": "Which default parameter is the safest starting point when a function should create a fresh list whenever no list is supplied?",
+    "options": ["items=[]", "items=list()", "items=None", "items={}"],
+    "correctAnswerIndex": 2,
+    "explanation": "Use None as a sentinel and create a list inside the function if items is None. A mutable default is evaluated at definition time and can be shared across calls."
+  },
+  {
+    "id": "quiz-functions-scope",
+    "topic": "Python Functions",
+    "question": "What does this print?\n\nvalue = 10\n\ndef change():\n    value = 2\n\nchange()\nprint(value)",
+    "options": ["2", "10", "None", "It raises NameError"],
+    "correctAnswerIndex": 1,
+    "explanation": "The assignment inside change creates a local name. It does not rebind the module-level value."
+  },
+  {
+    "id": "quiz-collections-tuple",
+    "topic": "Lists, Tuples, Sets, and Dictionaries",
+    "question": "Which built-in sequence cannot have its element references replaced after creation?",
+    "options": ["list", "dict", "set", "tuple"],
+    "correctAnswerIndex": 3,
+    "explanation": "A tuple is an immutable sequence. It can still contain references to objects that are themselves mutable."
+  },
+  {
+    "id": "quiz-collections-set",
+    "topic": "Lists, Tuples, Sets, and Dictionaries",
+    "question": "What is len({1, 1, 2, 3})?",
+    "options": ["3", "4", "2", "It raises ValueError"],
+    "correctAnswerIndex": 0,
+    "explanation": "A set keeps unique elements. The duplicate 1 does not add another element."
+  },
+  {
+    "id": "quiz-collections-get",
+    "topic": "Lists, Tuples, Sets, and Dictionaries",
+    "question": "What is the value of {}.get('score', 0)?",
+    "options": ["None", "'score'", "It raises KeyError", "0"],
+    "correctAnswerIndex": 3,
+    "explanation": "dict.get returns its supplied default when the key is absent. It does not insert the key."
+  },
+  {
+    "id": "quiz-collections-alias",
+    "topic": "Lists, Tuples, Sets, and Dictionaries",
+    "question": "What does this print?\n\na = [1]\nb = a\nb.append(2)\nprint(a)",
+    "options": ["[1]", "[2]", "[1, 2]", "None"],
+    "correctAnswerIndex": 2,
+    "explanation": "Both names reference the same list. Appending through b changes the list also referenced by a."
+  },
+  {
+    "id": "quiz-collections-comprehension",
+    "topic": "Lists, Tuples, Sets, and Dictionaries",
+    "question": "What does [n * 2 for n in [1, 2, 3]] produce?",
+    "options": ["[1, 2, 3, 1, 2, 3]", "[2, 4, 6]", "[1, 4, 9]", "[2, 3, 4]"],
+    "correctAnswerIndex": 1,
+    "explanation": "The comprehension visits each input element, multiplies it by 2, and collects the results in a new list."
+  },
+  {
+    "id": "quiz-oop-instance",
+    "topic": "Object-Oriented Programming",
+    "question": "Given a class named Dog with a no-argument constructor, which statement creates an instance?",
+    "options": ["pet = Dog()", "pet = Dog", "class pet(Dog): pass", "pet = 'Dog'"],
+    "correctAnswerIndex": 0,
+    "explanation": "Calling Dog() creates an instance. Assigning Dog without parentheses refers to the class itself."
+  },
+  {
+    "id": "quiz-oop-self",
+    "topic": "Object-Oriented Programming",
+    "question": "In a typical instance method, what does self reference?",
+    "options": ["The parent class", "Every instance at once", "The instance receiving the call", "The current module"],
+    "correctAnswerIndex": 2,
+    "explanation": "A bound instance-method call supplies the receiving instance as its first argument, conventionally named self."
+  },
+  {
+    "id": "quiz-oop-init",
+    "topic": "Object-Oriented Programming",
+    "question": "What is the usual role of __init__?",
+    "options": ["Delete an object", "Initialize an instance's state", "Import a module", "Make every attribute immutable"],
+    "correctAnswerIndex": 1,
+    "explanation": "__init__ sets up a newly created instance, often by assigning attributes such as self.name."
+  },
+  {
+    "id": "quiz-oop-override",
+    "topic": "Object-Oriented Programming",
+    "question": "What is method overriding?",
+    "options": ["Deleting all inherited methods", "Calling a method twice", "Changing a method's name at every call", "Defining a subclass method that replaces inherited behavior"],
+    "correctAnswerIndex": 3,
+    "explanation": "A subclass can provide its own implementation of an inherited method to customize the behavior."
+  },
+  {
+    "id": "quiz-oop-attribute",
+    "topic": "Object-Oriented Programming",
+    "question": "Which assignment normally stores instance-specific state inside __init__?",
+    "options": ["self.name = name", "name == self", "return name", "name = 'self.name'"],
+    "correctAnswerIndex": 0,
+    "explanation": "Assigning self.name stores an attribute on that instance. A local assignment by itself does not store an instance attribute."
+  },
+  {
+    "id": "quiz-structures-stack",
+    "topic": "Data Structures",
+    "question": "A stack contains A, then B, then C in push order. Which item is popped first?",
+    "options": ["A", "B", "All three together", "C"],
+    "correctAnswerIndex": 3,
+    "explanation": "A stack follows Last In, First Out. C was pushed most recently."
+  },
+  {
+    "id": "quiz-structures-queue",
+    "topic": "Data Structures",
+    "question": "Which standard-library container is suitable for efficient appends on the right and removals from the left?",
+    "options": ["tuple", "collections.deque", "str", "frozenset"],
+    "correctAnswerIndex": 1,
+    "explanation": "deque is designed for efficient operations at either end. append and popleft form a straightforward FIFO queue."
+  },
+  {
+    "id": "quiz-structures-leaf",
+    "topic": "Data Structures",
+    "question": "What is a leaf node in a tree?",
+    "options": ["A node with no children", "A node with exactly two children", "The node with the largest value", "A node that must be the root"],
+    "correctAnswerIndex": 0,
+    "explanation": "A leaf has no children. In a one-node tree, the root is also a leaf."
+  },
+  {
+    "id": "quiz-structures-hash-map",
+    "topic": "Data Structures",
+    "question": "Which Python built-in maps unique hashable keys to values?",
+    "options": ["list", "tuple", "dict", "range"],
+    "correctAnswerIndex": 2,
+    "explanation": "A dictionary associates keys with values and uses hashing for key lookup."
+  },
+  {
+    "id": "quiz-structures-pop",
+    "topic": "Data Structures",
+    "question": "Which expression removes and returns the last element of a nonempty Python list named items?",
+    "options": ["items.append()", "items.clear()", "items.remove()", "items.pop()"],
+    "correctAnswerIndex": 3,
+    "explanation": "Calling pop without an index removes and returns the final list element."
+  },
+  {
+    "id": "quiz-algorithms-binary",
+    "topic": "Algorithms and Coding Patterns",
+    "question": "What does binary search require for its usual comparison-based implementation on a list?",
+    "options": ["Every element must be a string", "The search range must be sorted", "The list must contain an even number of items", "All values must be unique"],
+    "correctAnswerIndex": 1,
+    "explanation": "Sorted order lets a comparison with the middle element eliminate one half of the remaining range."
+  },
+  {
+    "id": "quiz-algorithms-linear",
+    "topic": "Algorithms and Coding Patterns",
+    "question": "What does linear search do?",
+    "options": ["Always sort the input first", "Check only the middle item", "Check items in sequence until a match or the end", "Discard half the input after each comparison"],
+    "correctAnswerIndex": 2,
+    "explanation": "Linear search examines elements one at a time and does not require sorted input."
+  },
+  {
+    "id": "quiz-algorithms-recursion",
+    "topic": "Algorithms and Coding Patterns",
+    "question": "What is a base case in a recursive algorithm?",
+    "options": ["A condition that returns without another recursive call", "The largest possible input", "A second loop inside the recursion", "A variable shared by every function"],
+    "correctAnswerIndex": 0,
+    "explanation": "A base case ends a chain of recursive calls. Recursive steps must make progress toward a reachable base case."
+  },
+  {
+    "id": "quiz-algorithms-pointers",
+    "topic": "Algorithms and Coding Patterns",
+    "question": "Which approach checks a palindrome without constructing a reversed copy?",
+    "options": ["Sort all characters", "Compare only the first two characters", "Remove repeated characters", "Compare characters at two ends and move inward"],
+    "correctAnswerIndex": 3,
+    "explanation": "Two inward-moving pointers compare matching positions. A mismatch disproves a palindrome."
+  },
+  {
+    "id": "quiz-algorithms-boundary",
+    "topic": "Algorithms and Coding Patterns",
+    "question": "Which loop visits every valid index of a list named items exactly once?",
+    "options": ["for i in range(len(items) + 1):", "for i in range(len(items)):", "for i in range(1, len(items)):", "for i in range(len(items), 0):"],
+    "correctAnswerIndex": 1,
+    "explanation": "range(len(items)) produces indexes from zero through len(items) - 1. It also handles an empty list without entering the loop."
+  },
+  {
+    "id": "quiz-complexity-single",
+    "topic": "Big O Complexity",
+    "question": "A loop visits n items once and does constant work per item. What is its time complexity?",
+    "options": ["O(1)", "O(log n)", "O(n)", "O(n^2)"],
+    "correctAnswerIndex": 2,
+    "explanation": "The total work grows in proportion to the number of items visited."
+  },
+  {
+    "id": "quiz-complexity-nested",
+    "topic": "Big O Complexity",
+    "question": "Two nested loops each run n times, and the inner body does constant work. What is the time complexity?",
+    "options": ["O(n^2)", "O(n)", "O(log n)", "O(1)"],
+    "correctAnswerIndex": 0,
+    "explanation": "There are n inner iterations for every one of n outer iterations, giving n multiplied by n executions."
+  },
+  {
+    "id": "quiz-complexity-constant",
+    "topic": "Big O Complexity",
+    "question": "Under the usual array-backed-list model, what is the time complexity of reading items[0] from a nonempty list?",
+    "options": ["O(n)", "O(n log n)", "O(n^2)", "O(1)"],
+    "correctAnswerIndex": 3,
+    "explanation": "Accessing a known list index does not require visiting preceding elements. Its cost does not grow with the list length in this model."
+  },
+  {
+    "id": "quiz-complexity-space",
+    "topic": "Big O Complexity",
+    "question": "What auxiliary space does a new list containing n references require?",
+    "options": ["O(1)", "O(n)", "O(log n)", "O(n^2)"],
+    "correctAnswerIndex": 1,
+    "explanation": "The additional list stores a number of references proportional to n, even when it shares the referenced objects."
+  },
+  {
+    "id": "quiz-complexity-binary",
+    "topic": "Big O Complexity",
+    "question": "What is the worst-case number of comparisons for binary search on a sorted list of n elements?",
+    "options": ["O(n^2)", "O(n)", "O(log n)", "O(1)"],
+    "correctAnswerIndex": 2,
+    "explanation": "Binary search repeatedly halves the remaining search range, so the number of comparisons grows logarithmically."
+  },
+  {
+    "id": "quiz-interview-first",
+    "topic": "Technical Interview Questions",
+    "question": "What is the best first step when an interview problem leaves important behavior unspecified?",
+    "options": ["Start coding immediately", "Assume every input is valid", "Choose the most complex algorithm", "Clarify the expected input, output, and constraints"],
+    "correctAnswerIndex": 3,
+    "explanation": "Clarifying the contract prevents solving a different problem and makes your assumptions visible."
+  },
+  {
+    "id": "quiz-interview-explain",
+    "topic": "Technical Interview Questions",
+    "question": "Before implementing an optimized solution, what is useful to explain?",
+    "options": ["Only the programming-language syntax", "A correct baseline and its time and space costs", "Why testing is unnecessary", "The final answer without any reasoning"],
+    "correctAnswerIndex": 1,
+    "explanation": "A baseline establishes correctness and gives a concrete reference for discussing an optimization's benefit and trade-offs."
+  },
+  {
+    "id": "quiz-interview-edge",
+    "topic": "Technical Interview Questions",
+    "question": "Which is a useful boundary case for a function that processes a sequence?",
+    "options": ["An empty sequence", "Only the example from the prompt", "An input with no stated expected result", "A larger input with the same assumptions only"],
+    "correctAnswerIndex": 0,
+    "explanation": "An empty sequence can expose invalid indexing, incorrect initial values, or missing termination handling."
+  },
+  {
+    "id": "quiz-interview-debug",
+    "topic": "Technical Interview Questions",
+    "question": "Your solution fails on a small example. What is a useful next step?",
+    "options": ["Rewrite everything without inspecting it", "Ignore the failure if most cases work", "Trace the variables and compare each step with the intended behavior", "Remove the edge-case test"],
+    "correctAnswerIndex": 2,
+    "explanation": "A focused trace can identify the first incorrect state and help you fix the actual cause."
+  },
+  {
+    "id": "quiz-interview-tradeoffs",
+    "topic": "Technical Interview Questions",
+    "question": "A faster approach uses extra storage. How should you present it?",
+    "options": ["Call it better without qualification", "Mention only its runtime", "Claim its space use is always zero", "Explain the time-space trade-off against the problem's constraints"],
+    "correctAnswerIndex": 3,
+    "explanation": "An optimization is useful in context. State both resource costs and explain whether they fit the constraints."
+  }
+]

@@ -1,0 +1,36 @@
+﻿@inherits LayoutComponentBase
+
+<a class="skip-link" href="#main-content">Skip to content</a>
+
+<div class="app-shell">
+    <header class="app-header">
+        <a class="brand" href="" aria-label="Python Study Companion home">
+            <span class="brand-mark" aria-hidden="true">&gt;_</span>
+            <span>Python<span class="brand-subtitle">Study Companion</span></span>
+        </a>
+        <span class="version-badge">YOUR LEARNING SPACE</span>
+    </header>
+
+    <main id="main-content" tabindex="-1">
+        @Body
+    </main>
+
+    <nav class="bottom-nav" aria-label="Primary navigation">
+        <NavLink href="" Match="NavLinkMatch.All">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1Z" /></svg>
+            <span>Home</span>
+        </NavLink>
+        <NavLink href="flashcards">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="7" width="16" height="14" rx="3" /><path d="M17 7V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v10M9 12h8m-8 4h5" /></svg>
+            <span>Flashcards</span>
+        </NavLink>
+        <NavLink href="practice">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m8 7-5 5 5 5m8-10 5 5-5 5M14 4l-4 16" /></svg>
+            <span>Practice</span>
+        </NavLink>
+        <NavLink href="progress">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 3v17h17M8 16v-5m5 5V7m5 9V4" /></svg>
+            <span>Progress</span>
+        </NavLink>
+    </nav>
+</div>

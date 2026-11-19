@@ -1,0 +1,122 @@
+[
+  {
+    "id": "coding-count-vowels",
+    "topic": "Python Fundamentals",
+    "title": "Count the vowels",
+    "difficulty": "Easy",
+    "description": "Write count_vowels(text), which returns the number of English vowels in a string. Count a, e, i, o, and u in either case. Other characters do not count. Return 0 for an empty string.",
+    "exampleInput": "print(count_vowels('Hello, Python!'))",
+    "expectedOutput": "3",
+    "hints": [
+      "Keep a counter and examine each character.",
+      "Convert each character to lowercase before checking membership in 'aeiou'."
+    ],
+    "solution": "def count_vowels(text):\n    count = 0\n    for character in text:\n        if character.lower() in 'aeiou':\n            count += 1\n    return count",
+    "explanation": "The loop visits each character, normalizes its case, and increments the counter only for a vowel. The counter naturally remains 0 for empty input. Time is O(n), where n is the string length, and auxiliary space is O(1)."
+  },
+  {
+    "id": "coding-safe-average",
+    "topic": "Python Functions",
+    "title": "A safe average",
+    "difficulty": "Easy",
+    "description": "Write average(numbers) for a list of integers or floats. Return the arithmetic mean for a nonempty list, and None for an empty list. Do not modify the input.",
+    "exampleInput": "print(average([2, 4, 6]))\nprint(average([]))",
+    "expectedOutput": "4.0\nNone",
+    "hints": [
+      "Handle the empty list before dividing.",
+      "For a nonempty list, divide sum(numbers) by len(numbers)."
+    ],
+    "solution": "def average(numbers):\n    if not numbers:\n        return None\n    return sum(numbers) / len(numbers)",
+    "explanation": "The guard clause prevents division by zero and defines the empty-input behavior explicitly. sum visits the list once; len reads the list length. Time is O(n) and auxiliary space is O(1) under the usual numeric-operation model."
+  },
+  {
+    "id": "coding-word-counts",
+    "topic": "Lists, Tuples, Sets, and Dictionaries",
+    "title": "Build a word counter",
+    "difficulty": "Easy",
+    "description": "Write count_words(words), which returns a dictionary mapping each string to its frequency in a list. Treat different letter cases as different words. Return an empty dictionary for an empty list.",
+    "exampleInput": "print(count_words(['red', 'blue', 'red']))",
+    "expectedOutput": "{'red': 2, 'blue': 1}",
+    "hints": [
+      "Use each word as a dictionary key.",
+      "dict.get(word, 0) supplies a starting count for a new word."
+    ],
+    "solution": "def count_words(words):\n    counts = {}\n    for word in words:\n        counts[word] = counts.get(word, 0) + 1\n    return counts",
+    "explanation": "Each word increments one dictionary entry. Dictionary insertion order preserves the first appearance of each word in the printed example. For n words and k distinct words, expected time is O(n) assuming constant-cost hashing of the input strings, and auxiliary space is O(k)."
+  },
+  {
+    "id": "coding-counter-class",
+    "topic": "Object-Oriented Programming",
+    "title": "Create a counter",
+    "difficulty": "Easy",
+    "description": "Create a Counter class. Each instance starts at 0. Its increment() method adds 1 and returns the updated value. Different instances must maintain independent counts.",
+    "exampleInput": "first = Counter()\nsecond = Counter()\nprint(first.increment())\nprint(first.increment())\nprint(second.increment())",
+    "expectedOutput": "1\n2\n1",
+    "hints": [
+      "Initialize the count with self.value inside __init__.",
+      "Use self.value in increment so the state belongs to that instance."
+    ],
+    "solution": "class Counter:\n    def __init__(self):\n        self.value = 0\n\n    def increment(self):\n        self.value += 1\n        return self.value",
+    "explanation": "__init__ creates a value attribute on each instance. increment updates only the receiving instance, so the second counter remains independent. Each call uses O(1) time and O(1) auxiliary space under the usual integer-operation model."
+  },
+  {
+    "id": "coding-balanced-brackets",
+    "topic": "Data Structures",
+    "title": "Balance parentheses",
+    "difficulty": "Medium",
+    "description": "Write is_balanced(text), which returns True when every '(' is matched by a later ')' in the correct order. Ignore other characters. An empty string is balanced. Use a stack to practice Last In, First Out behavior.",
+    "exampleInput": "print(is_balanced('(a + (b))'))\nprint(is_balanced(')('))\nprint(is_balanced(''))",
+    "expectedOutput": "True\nFalse\nTrue",
+    "hints": [
+      "Push onto a list for each opening parenthesis.",
+      "A closing parenthesis is invalid if the stack is empty. The stack must also be empty at the end."
+    ],
+    "solution": "def is_balanced(text):\n    stack = []\n    for character in text:\n        if character == '(':\n            stack.append(character)\n        elif character == ')':\n            if not stack:\n                return False\n            stack.pop()\n    return not stack",
+    "explanation": "The stack stores unmatched opening parentheses. Each closing parenthesis removes the most recent opener. An unmatched closer fails immediately, while leftover openers fail at the end. Time is O(n) and worst-case auxiliary space is O(n). A counter could solve this single-bracket-type problem in O(1) space."
+  },
+  {
+    "id": "coding-palindrome",
+    "topic": "Algorithms and Coding Patterns",
+    "title": "Two-pointer palindrome",
+    "difficulty": "Easy",
+    "description": "Write is_palindrome(text) using two pointers rather than a reversed copy. Compare characters exactly: case, spaces, and punctuation matter. Empty and one-character strings are palindromes.",
+    "exampleInput": "print(is_palindrome('level'))\nprint(is_palindrome('python'))\nprint(is_palindrome(''))",
+    "expectedOutput": "True\nFalse\nTrue",
+    "hints": [
+      "Start one index at 0 and the other at len(text) - 1.",
+      "A mismatch returns False. Otherwise move inward until the pointers meet or cross."
+    ],
+    "solution": "def is_palindrome(text):\n    left = 0\n    right = len(text) - 1\n    while left < right:\n        if text[left] != text[right]:\n            return False\n        left += 1\n        right -= 1\n    return True",
+    "explanation": "Each step compares a pair of characters and shrinks the unchecked range. If no pair differs, the string reads the same in both directions. Empty and single-character inputs skip the loop. Time is O(n) and auxiliary space is O(1)."
+  },
+  {
+    "id": "coding-find-maximum",
+    "topic": "Big O Complexity",
+    "title": "Find the maximum in one pass",
+    "difficulty": "Easy",
+    "description": "Write find_maximum(numbers) for a list of integers. Return the largest number, or None when the list is empty. Do not sort the list, call max, or modify the input. Explain the time and space costs.",
+    "exampleInput": "print(find_maximum([-8, -3, -12]))\nprint(find_maximum([]))",
+    "expectedOutput": "-3\nNone",
+    "hints": [
+      "Handle an empty list before reading the first element.",
+      "Start the best-so-far value at the first number, not 0, so negative-only lists work."
+    ],
+    "solution": "def find_maximum(numbers):\n    if not numbers:\n        return None\n    best = numbers[0]\n    for number in numbers:\n        if number > best:\n            best = number\n    return best",
+    "explanation": "best tracks the largest value seen so far. Initializing it from the input handles all-negative lists correctly. The loop visits n values once, giving O(n) time and O(1) auxiliary space. Unlike a sorted copy, it needs no extra list."
+  },
+  {
+    "id": "coding-two-sum",
+    "topic": "Technical Interview Questions",
+    "title": "Find a pair that sums to a target",
+    "difficulty": "Medium",
+    "description": "Write two_sum(numbers, target) for a list of integers. Return a tuple of two distinct indexes whose values add to target, or None if no pair exists. Return the first pair discovered while scanning left to right. Do not modify the input.",
+    "exampleInput": "print(two_sum([2, 7, 11, 15], 9))\nprint(two_sum([3, 3], 6))\nprint(two_sum([1, 2], 8))",
+    "expectedOutput": "(0, 1)\n(0, 1)\nNone",
+    "hints": [
+      "For each number, compute target - number. Have you seen that value already?",
+      "Store earlier values and their indexes in a dictionary. Check before inserting the current value so one index cannot be used twice."
+    ],
+    "solution": "def two_sum(numbers, target):\n    seen = {}\n    for index, number in enumerate(numbers):\n        complement = target - number\n        if complement in seen:\n            return (seen[complement], index)\n        if number not in seen:\n            seen[number] = index\n    return None",
+    "explanation": "seen maps each earlier number to its first index. A complement lookup finds a valid earlier partner without reusing the current index. Checking before insertion handles duplicate values such as [3, 3]. Keeping the first index makes ties deterministic. Expected time is O(n) and auxiliary space is O(n), assuming constant-cost integer hashing and arithmetic."
+  }
+]

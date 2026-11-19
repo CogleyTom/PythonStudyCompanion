@@ -1,4 +1,9 @@
 ﻿@page "/"
+@using System.Text.Json
+@using PythonStudyCompanion.Models
+@using PythonStudyCompanion.Services
+@inject ProgressService Tracker
+@inject FlashcardService Content
 
 <PageTitle>Home | Python Study Companion</PageTitle>
 
@@ -29,34 +34,59 @@
     <div class="stats-grid">
         <article class="stat-card">
             <span class="stat-label">Cards due</span>
-            <strong>&mdash;</strong>
-            <span class="stat-note">Review scheduling coming soon</span>
+            <strong>@(Tracker.IsAvailable && cardsLoaded ? cards.Count(card => Tracker.IsCardDue(card.Id)).ToString() : "\u2014")</strong>
+            <span class="stat-note">Includes new and scheduled cards</span>
         </article>
         <article class="stat-card">
             <span class="stat-label">Cards studied</span>
-            <strong>0</strong>
-            <span class="stat-note">Your all-time total</span>
+            <strong>@(Tracker.IsAvailable ? Tracker.CardsStudied.ToString() : "\u2014")</strong>
+            <span class="stat-note">All saved review attempts</span>
         </article>
         <article class="stat-card">
             <span class="stat-label">Quiz accuracy</span>
-            <strong>&mdash;</strong>
-            <span class="stat-note">No quizzes completed yet</span>
+            <strong>@(Tracker.IsAvailable && Tracker.QuizAccuracy is int accuracy ? $"{accuracy}%" : "\u2014")</strong>
+            <span class="stat-note">Across all saved quiz answers</span>
         </article>
         <article class="stat-card">
             <span class="stat-label">Study streak</span>
-            <strong>0 <small>days</small></strong>
+            <strong>@(Tracker.IsAvailable ? Tracker.CurrentStreak.ToString() : "\u2014") <small>days</small></strong>
             <span class="stat-note">Every day is a fresh start</span>
         </article>
     </div>
     <div class="daily-progress">
         <div class="section-heading">
             <span>Today's study progress</span>
-            <strong>0 studied</strong>
+            <strong>@(Tracker.IsAvailable ? $"{Tracker.ActivityOn(Tracker.Today)} actions" : "Unavailable")</strong>
         </div>
-        <progress value="0" max="1" aria-label="Today's study progress: no activity yet"></progress>
-        <p>Activity tracking will be connected in Milestone 4.</p>
+        <progress value="@(Tracker.IsAvailable ? Math.Min(Tracker.ActivityOn(Tracker.Today), Tracker.DailyGoal) : 0)"
+                  max="@Tracker.DailyGoal" aria-label="Today's study activity toward a ten-action goal"></progress>
+        <p>Daily goal: @Tracker.DailyGoal card ratings, quiz answers, or explicitly reviewed coding exercises.</p>
+        @if (catalogError is not null)
+        {
+            <p role="status">@catalogError</p>
+        }
     </div>
 </section>
+
+@code {
+    private IReadOnlyList<Flashcard> cards = [];
+    private bool cardsLoaded;
+    private string? catalogError;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await Tracker.InitializeAsync();
+        try
+        {
+            cards = await Content.LoadAsync();
+            cardsLoaded = true;
+        }
+        catch (Exception exception) when (exception is HttpRequestException or JsonException or OperationCanceledException)
+        {
+            catalogError = "Flashcard content couldn't be loaded, so the due-card count is unavailable.";
+        }
+    }
+}
 
 <section class="dashboard-section" aria-labelledby="study-heading">
     <div class="section-heading">

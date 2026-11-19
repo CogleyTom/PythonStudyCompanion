@@ -1,4 +1,7 @@
 ﻿@inherits LayoutComponentBase
+@implements IDisposable
+@inject PythonStudyCompanion.Services.ProgressService Tracker
+@inject NavigationManager Navigation
 
 <a class="skip-link" href="#main-content">Skip to content</a>
 
@@ -12,6 +15,16 @@
     </header>
 
     <main id="main-content" tabindex="-1">
+        @if (Tracker.Error is not null)
+        {
+            <section class="storage-warning" role="alert" aria-label="Progress storage status">
+                <p>@Tracker.Error</p>
+                <div class="study-toolbar">
+                    <a href="progress">Manage backups</a>
+                    <button type="button" class="button button-secondary" @onclick="ReloadApp">Reload app</button>
+                </div>
+            </section>
+        }
         @Body
     </main>
 
@@ -34,3 +47,17 @@
         </NavLink>
     </nav>
 </div>
+
+@code {
+    protected override async Task OnInitializedAsync()
+    {
+        Tracker.Changed += OnProgressChanged;
+        await Tracker.InitializeAsync();
+    }
+
+    private void OnProgressChanged() => _ = InvokeAsync(StateHasChanged);
+    private void ReloadApp() => Navigation.NavigateTo(Navigation.Uri, forceLoad: true);
+
+    /// <summary>Removes the progress-status subscription when the layout is disposed.</summary>
+    public void Dispose() => Tracker.Changed -= OnProgressChanged;
+}

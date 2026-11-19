@@ -1,4 +1,9 @@
 @page "/progress"
+@using System.Text.Json
+@using PythonStudyCompanion.Models
+@using PythonStudyCompanion.Services
+@inject ProgressService Tracker
+@inject FlashcardService Content
 
 <PageTitle>Progress | Python Study Companion</PageTitle>
 
@@ -8,11 +13,227 @@
     <p>A clearer picture of how far you've come.</p>
 </section>
 
-<section class="empty-state" aria-labelledby="progress-heading">
-    <span class="action-symbol" aria-hidden="true">+</span>
-    <span class="pill">MILESTONE 4</span>
-    <h2 id="progress-heading">A fresh start.</h2>
-    <p>Cards studied, correct and incorrect answers, quiz performance, topic proficiency, daily activity, and streaks will appear here.</p>
-    <p>Local progress storage and JSON backup import and export are not connected yet. No study activity is currently recorded.</p>
-    <a class="button" href="">Back to dashboard</a>
+@if (isLoading)
+{
+    <p role="status">Loading your saved progress...</p>
+}
+else if (Tracker.IsAvailable)
+{
+    <section aria-label="Study totals">
+        <div class="stats-grid">
+            <article class="stat-card">
+                <span class="stat-label">Cards studied</span><strong>@Tracker.CardsStudied</strong>
+                <span class="stat-note">Saved review attempts</span>
+            </article>
+            <article class="stat-card">
+                <span class="stat-label">Correct</span><strong>@Tracker.CorrectAnswers</strong>
+                <span class="stat-note">Remembered cards and quiz answers</span>
+            </article>
+            <article class="stat-card">
+                <span class="stat-label">Incorrect</span><strong>@Tracker.IncorrectAnswers</strong>
+                <span class="stat-note">Again ratings and missed quiz answers</span>
+            </article>
+            <article class="stat-card">
+                <span class="stat-label">Current streak</span><strong>@Tracker.CurrentStreak <small>days</small></strong>
+                <span class="stat-note">Consecutive active local dates</span>
+            </article>
+        </div>
+        <p class="storage-notice">
+            @(cardsLoaded ? $"{cards.Count(card => Tracker.IsCardDue(card.Id))} new or due cards" : "Due-card count unavailable")
+            &middot; @Tracker.ExercisesReviewed distinct coding exercises reviewed.
+            Card correctness is self-assessed; coding reviews are not scored.
+        </p>
+        @if (catalogError is not null)
+        {
+            <p class="storage-notice" role="status">@catalogError</p>
+        }
+    </section>
+
+    <section class="dashboard-section" aria-labelledby="activity-heading">
+        <div class="section-heading">
+            <h2 id="activity-heading">Daily activity</h2>
+            <span class="muted">@Tracker.ActivityOn(Tracker.Today) actions today &middot; Goal @Tracker.DailyGoal</span>
+        </div>
+        <div class="activity-grid">
+            @for (var offset = 6; offset >= 0; offset--)
+            {
+                var date = Tracker.Today.AddDays(-offset);
+                var count = Tracker.ActivityOn(date);
+                <div class="activity-day @(count > 0 ? "has-activity" : null)">
+                    <span>@date.ToString("ddd")</span>
+                    <strong>@count</strong>
+                    <span>@date.ToString("MMM d")</span>
+                </div>
+            }
+        </div>
+        <p class="storage-notice">One action is a card rating, quiz answer, or coding exercise marked reviewed. Correcting a rating in the same round does not add another action. A streak stays current through yesterday.</p>
+    </section>
+
+    <section class="dashboard-section" aria-labelledby="proficiency-heading">
+        <h2 id="proficiency-heading">Topic proficiency</h2>
+        <p class="section-description proficiency-help">Uses each topic's latest 20 answers. Confident means at least 5 answers, 3 distinct items, and 80% accuracy. Start with Easy exercises, then try Medium when confident.</p>
+        <div class="proficiency-grid">
+            @foreach (var topic in cards.Select(card => card.Topic).Concat(Tracker.StudiedTopics).Distinct())
+            {
+                var accuracy = Tracker.TopicAccuracy(topic);
+                <article class="proficiency-card">
+                    <h3>@topic</h3>
+                    <div class="section-heading">
+                        <span class="pill">@Tracker.TopicLevel(topic)</span>
+                        <span class="muted">@(accuracy is int topicAccuracy ? $"{topicAccuracy}%" : "No answers yet")</span>
+                    </div>
+                    <progress value="@(accuracy ?? 0)" max="100" aria-label="@($"{topic} recent accuracy")"></progress>
+                </article>
+            }
+        </div>
+    </section>
+
+    <section class="dashboard-section" aria-labelledby="quiz-history-heading">
+        <div class="section-heading">
+            <h2 id="quiz-history-heading">Quiz performance</h2>
+            <span class="muted">@(Tracker.QuizAccuracy is int quizAccuracy ? $"{quizAccuracy}% overall accuracy" : "No quiz answers yet")</span>
+        </div>
+        <p class="section-description">Accuracy includes all saved quiz answers, including unfinished rounds and retries. Latest 10 completed rounds shown below; all rounds stay in your backup.</p>
+        @if (Tracker.Quizzes.Count == 0)
+        {
+            <div class="empty-state">
+                <h3>Your next quiz starts the story.</h3>
+                <p>Complete a round to see its score here.</p>
+                <a class="button" href="practice/quiz">Start a quiz</a>
+            </div>
+        }
+        else
+        {
+            <ol class="quiz-history">
+                @foreach (var quiz in Tracker.Quizzes.OrderByDescending(quiz => quiz.CompletedAt).Take(10))
+                {
+                    var correct = Tracker.QuizCorrectCount(quiz);
+                    <li>
+                        <div>
+                            <strong>@(quiz.IsRetry ? "Missed-question retry" : "Quiz round")</strong>
+                            <span class="muted">@quiz.CompletedAt.ToLocalTime().ToString("MMM d, yyyy h:mm tt")</span>
+                        </div>
+                        <span>@correct / @quiz.QuestionCount <strong>@((int)Math.Round(100.0 * correct / quiz.QuestionCount))%</strong></span>
+                    </li>
+                }
+            </ol>
+        }
+    </section>
+
+    <details class="schedule-help">
+        <summary>How review scheduling works</summary>
+        <p>Again resets a card to a 10-minute retry. Good starts at 1 day and doubles the last successful interval. Easy starts at 3 days and triples it. Intervals stop growing at 365 days. New cards count as due.</p>
+        <p>Future sessions prioritize due misses, other due cards, then new cards. Quiz sessions prioritize the most recently missed questions, then new questions, then previously correct ones. Practice ahead by disabling the due-only flashcard filter.</p>
+    </details>
+}
+
+<section class="dashboard-section backup-panel" aria-labelledby="backup-heading">
+    <h2 id="backup-heading">Your progress, backed up</h2>
+    <p>Progress belongs to this browser on this device. Clearing website data removes it. Export a JSON backup to keep a copy or move to another device.</p>
+    <button type="button" class="button" disabled="@isBusy" @onclick="ExportBackup">Export progress</button>
+    <label class="backup-label" for="progress-backup">Import a progress backup (JSON, up to 10 MB)</label>
+    <InputFile id="progress-backup" @key="fileInputKey" OnChange="SelectBackup" accept=".json,application/json" disabled="@isBusy" />
+    @if (pendingImport is not null)
+    {
+        <div class="backup-preview">
+            <h3>Backup ready to restore</h3>
+            <p>@pendingImport.Answers.Count answers, @pendingImport.Quizzes.Count completed quiz rounds, and @pendingImport.ExerciseReviews.Count coding review records.</p>
+            <p><strong>This replaces, rather than merges with, this browser's saved progress.</strong> Export your current progress first if you want to keep both.</p>
+            <div class="study-toolbar">
+                <button type="button" class="button" disabled="@isBusy" @onclick="RestoreBackup">Replace local progress</button>
+                <button type="button" class="button button-secondary" disabled="@isBusy" @onclick="() => pendingImport = null">Cancel</button>
+            </div>
+        </div>
+    }
+    @if (backupMessage is not null)
+    {
+        <p class="@(backupFailed ? "save-error" : "backup-message")" role="@(backupFailed ? "alert" : "status")">@backupMessage</p>
+    }
 </section>
+
+@code {
+    private IReadOnlyList<Flashcard> cards = [];
+    private bool cardsLoaded;
+    private bool isLoading = true;
+    private string? catalogError;
+    private StudyProgress? pendingImport;
+    private bool isBusy;
+    private bool backupFailed;
+    private string? backupMessage;
+    private int fileInputKey;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await Tracker.InitializeAsync();
+        try
+        {
+            cards = await Content.LoadAsync();
+            cardsLoaded = true;
+        }
+        catch (Exception exception) when (exception is HttpRequestException or JsonException or OperationCanceledException)
+        {
+            catalogError = "Flashcard content couldn't be loaded. Saved statistics and backups are still available.";
+        }
+        isLoading = false;
+    }
+
+    private async Task ExportBackup()
+    {
+        isBusy = true;
+        try
+        {
+            backupFailed = !await Tracker.ExportAsync();
+            backupMessage = backupFailed ? Tracker.Error : "Backup download requested. Save the JSON file somewhere you can find it again.";
+        }
+        finally
+        {
+            isBusy = false;
+        }
+    }
+
+    private async Task SelectBackup(InputFileChangeEventArgs args)
+    {
+        isBusy = true;
+        pendingImport = null;
+        backupMessage = null;
+        backupFailed = false;
+        try
+        {
+            await using var stream = args.File.OpenReadStream(ProgressService.MaxBackupBytes);
+            using var reader = new StreamReader(stream);
+            pendingImport = ProgressService.ParseBackup(await reader.ReadToEndAsync());
+        }
+        catch (Exception exception) when (exception is IOException or JsonException)
+        {
+            backupFailed = true;
+            backupMessage = $"Backup not imported: {exception.Message}";
+        }
+        finally
+        {
+            fileInputKey++;
+            isBusy = false;
+        }
+    }
+
+    private async Task RestoreBackup()
+    {
+        if (pendingImport is null || isBusy)
+        {
+            return;
+        }
+        isBusy = true;
+        try
+        {
+            backupFailed = !await Tracker.ImportAsync(pendingImport);
+            backupMessage = backupFailed ? Tracker.Error : "Progress restored on this device.";
+            if (!backupFailed)
+            {
+                pendingImport = null;
+            }
+        }
+        finally
+        {
+            isBusy = false;
+        }
+    }
+}

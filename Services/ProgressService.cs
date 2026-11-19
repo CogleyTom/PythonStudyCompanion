@@ -125,13 +125,16 @@ public sealed class ProgressService : IAsyncDisposable
         {
             IsAvailable = false;
             Error = "Saved progress couldn't be read. Existing storage has not been replaced. Reload the app to retry, or restore a valid backup on the Progress page.";
-            module = null;
+            if (module is { IsFaulted: true })
+            {
+                module = null;
+            }
         }
         finally
         {
             gate.Release();
-            Changed?.Invoke();
         }
+        Changed?.Invoke();
     }
 
     /// <summary>Gets the number of study actions on a recorded local date.</summary>
@@ -229,6 +232,10 @@ public sealed class ProgressService : IAsyncDisposable
     public Task<bool> RecordCardAsync(Guid sessionId, Flashcard card, AnswerRating rating) =>
         SaveAsync(snapshot =>
         {
+            if (rating is not (AnswerRating.Again or AnswerRating.Good or AnswerRating.Easy))
+            {
+                throw new JsonException("Flashcards require an Again, Good, or Easy rating.");
+            }
             var index = snapshot.Answers.FindIndex(answer => answer.SessionId == sessionId && answer.ContentId == card.Id);
             var answer = new StudyAnswer
             {
@@ -258,6 +265,10 @@ public sealed class ProgressService : IAsyncDisposable
     public Task<bool> RecordQuizAnswerAsync(Guid sessionId, QuizQuestion question, bool correct, int questionCount, bool isRetry) =>
         SaveAsync(snapshot =>
         {
+            if (questionCount is < 1 or > 15)
+            {
+                throw new JsonException("A quiz round must contain one through fifteen questions.");
+            }
             if (snapshot.Answers.Any(answer => answer.SessionId == sessionId && answer.ContentId == question.Id))
             {
                 return;

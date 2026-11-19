@@ -8,13 +8,14 @@
     <meta name="theme-color" content="#f6f7f4" media="(prefers-color-scheme: light)" />
     <meta name="theme-color" content="#111b17" media="(prefers-color-scheme: dark)" />
     <meta name="apple-mobile-web-app-title" content="Python Study" />
+    <meta name="mobile-web-app-capable" content="yes" />
     <title>Python Study Companion</title>
     <base href="/" />
     <link rel="preload" id="webassembly" />
     <link rel="stylesheet" href="css/app.css" />
     <link href="manifest.webmanifest" rel="manifest" />
-    <link rel="apple-touch-icon" sizes="512x512" href="icon-512.png" />
-    <link rel="apple-touch-icon" sizes="192x192" href="icon-192.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="favicon.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png" />
     <script type="importmap"></script>
 </head>
 
@@ -34,7 +35,6 @@
         <button type="button" class="dismiss" aria-label="Dismiss error">&times;</button>
     </div>
     <script src="_framework/blazor.webassembly#[.{fingerprint}].js"></script>
-    <script>navigator.serviceWorker.register('service-worker.js', { updateViaCache: 'none' });</script>
 </body>
 
 </html>

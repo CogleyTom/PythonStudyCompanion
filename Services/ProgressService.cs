@@ -18,6 +18,7 @@ public sealed class ProgressService : IAsyncDisposable
     private readonly TimeProvider clock;
     private readonly SemaphoreSlim gate = new(1, 1);
     private Task<IJSObjectReference>? module;
+    private Task pendingSaves = Task.CompletedTask;
     private StudyProgress data = EmptyProgress();
     private Dictionary<string, CardSchedule> schedules = new(StringComparer.Ordinal);
     private Dictionary<string, StudyAnswer> lastQuizAnswers = new(StringComparer.Ordinal);
@@ -345,6 +346,10 @@ public sealed class ProgressService : IAsyncDisposable
         }
     }
 
+    /// <summary>Waits for progress writes already queued before an application update.</summary>
+    /// <returns>A task completed after already queued progress writes finish.</returns>
+    public Task WaitForPendingSavesAsync() => pendingSaves;
+
     /// <summary>Releases the JavaScript module used by this service.</summary>
     /// <returns>A task completed after the module reference is released.</returns>
     public async ValueTask DisposeAsync()
@@ -359,7 +364,14 @@ public sealed class ProgressService : IAsyncDisposable
     private Task<IJSObjectReference> ModuleAsync() =>
         module ??= js.InvokeAsync<IJSObjectReference>("import", "./js/progress.js").AsTask();
 
-    private async Task<bool> SaveAsync(Action<StudyProgress> change, StudyProgress? replacement = null)
+    private Task<bool> SaveAsync(Action<StudyProgress> change, StudyProgress? replacement = null)
+    {
+        var save = SaveCoreAsync(change, replacement);
+        pendingSaves = Task.WhenAll(pendingSaves, save);
+        return save;
+    }
+
+    private async Task<bool> SaveCoreAsync(Action<StudyProgress> change, StudyProgress? replacement)
     {
         await InitializeAsync();
         await gate.WaitAsync();

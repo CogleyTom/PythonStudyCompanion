@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" role="img" aria-labelledby="title description">
+  <title id="title">Python Study Companion</title>
+  <desc id="description">Blue and yellow Py lettering on a forest-green coding tile.</desc>
+  <rect width="512" height="512" fill="#194d3d"/>
+  <rect x="76" y="76" width="360" height="360" rx="64" fill="#123d30"/>
+  <circle cx="130" cy="128" r="9" fill="#89bee7"/>
+  <circle cx="160" cy="128" r="9" fill="#f0d477"/>
+  <circle cx="190" cy="128" r="9" fill="#9cc5aa"/>
+  <g font-family="Segoe UI, Arial, sans-serif" font-weight="700" font-size="256">
+    <text x="121" y="333" fill="#89bee7">P</text>
+    <text x="266" y="333" fill="#f0d477">y</text>
+  </g>
+</svg>

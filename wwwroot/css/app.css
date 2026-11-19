@@ -16,7 +16,8 @@
 }
 
 * { box-sizing: border-box; }
-body { margin: 0; background: var(--background); color: var(--text); line-height: 1.6; }
+html { scroll-padding-bottom: calc(110px + env(safe-area-inset-bottom)); }
+body { margin: 0; min-height: 100svh; background: var(--background); color: var(--text); line-height: 1.6; }
 a { color: var(--accent); text-underline-offset: 4px; }
 button, a { -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
 button { font: inherit; }
@@ -199,6 +200,19 @@ input:focus-visible, select:focus-visible { outline: 3px solid var(--accent); ou
 .backup-preview p { margin: 12px 0 18px; font-size: 0.85rem; overflow-wrap: anywhere; }
 .backup-message { color: var(--accent); font-size: 0.85rem; margin-top: 18px; }
 
+.pwa-status { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 4px 12px; padding-top: 10px; color: var(--muted); font-size: 0.75rem; }
+.pwa-status > span { display: inline-flex; align-items: center; gap: 8px; }
+.connection-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--muted); }
+.connection-dot.is-ready { background: var(--accent); }
+.text-button { min-height: 44px; padding: 8px 0; border: 0; background: transparent; color: var(--accent); font-size: 0.75rem; font-weight: 600; cursor: pointer; }
+.text-button:disabled { opacity: 0.5; cursor: default; }
+.update-banner { margin-top: 12px; padding: 22px; border: 1px solid var(--accent); border-radius: 18px; background: var(--accent-soft); }
+.update-banner h2 { font-size: 1.15rem; }
+.update-banner p { margin: 10px 0 18px; font-size: 0.85rem; }
+.update-overlay { position: fixed; inset: 0; z-index: 100; display: grid; place-items: center; padding: 24px; background: var(--background); }
+.update-overlay > div { max-width: 420px; text-align: center; }
+.update-overlay p { margin-top: 14px; color: var(--muted); }
+
 @media (min-width: 760px) {
     .bottom-nav { left: 50%; right: auto; bottom: 16px; transform: translateX(-50%); width: min(520px, 90%); padding: 8px; border: 1px solid var(--border); border-radius: 22px; box-shadow: 0 8px 30px #102f3014; }
 }
@@ -211,6 +225,7 @@ input:focus-visible, select:focus-visible { outline: 3px solid var(--accent); ou
     .stats-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     .stat-card { padding: 17px; }
     .action-grid, .topic-list { grid-template-columns: 1fr; }
+    .session-length select { font-size: 1rem; }
 }
 
 @media (prefers-color-scheme: dark) {

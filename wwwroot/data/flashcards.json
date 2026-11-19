@@ -14,7 +14,7 @@
   {
     "id": "fundamentals-truthiness",
     "topic": "Python Fundamentals",
-    "front": "Is an empty list truthy or falsy? What does this code print?\n\nitems = []\nif not items:\n    print('Empty')",
+    "front": "Is an empty list true or false? What does this code print?\n\nitems = []\nif not items:\n    print('Empty')",
     "back": "An empty list is falsy, so the code prints Empty.\n\nNone, False, numeric zero, and empty built-in containers are also falsy."
   },
   {

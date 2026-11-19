@@ -1,0 +1,181 @@
+@implements IAsyncDisposable
+@inject IJSRuntime JS
+@inject PythonStudyCompanion.Services.ProgressService Tracker
+
+<div class="pwa-status" role="status">
+    <span><span class="connection-dot @(offlineReady ? "is-ready" : null)" aria-hidden="true"></span>@StatusText</span>
+    <button type="button" class="text-button" disabled="@(isChecking || isApplying)" @onclick="CheckForUpdates">
+        @(isChecking ? "Checking..." : "Check for updates")
+    </button>
+</div>
+
+@if (updateAvailable && !dismissed)
+{
+    <section class="update-banner" aria-labelledby="update-heading">
+        <h2 id="update-heading">A fresh version is ready.</h2>
+        <p>Saved progress stays on this device. Updating restarts active sessions in this app's open tabs.</p>
+        <div class="study-toolbar">
+            <button type="button" class="button" disabled="@isApplying" @onclick="ApplyUpdate">Reload to update</button>
+            <button type="button" class="button button-secondary" disabled="@isApplying" @onclick="() => dismissed = true">Later</button>
+        </div>
+    </section>
+}
+@if (error is not null)
+{
+    <p class="save-error" role="alert">@error</p>
+}
+@if (isApplying)
+{
+    <div class="update-overlay" role="status" aria-live="polite">
+        <div><h2>Updating your study space...</h2><p>Finishing pending saves before reloading.</p></div>
+    </div>
+}
+
+@code {
+    /// <summary>Gets or sets the callback that pauses the surrounding app during an update.</summary>
+    /// <value>A callback receiving true while an update is being applied.</value>
+    [Parameter]
+    public EventCallback<bool> ApplyingChanged { get; set; }
+
+    private IJSObjectReference? module;
+    private DotNetObjectReference<PwaStatus>? reference;
+    private bool online = true;
+    private bool offlineReady;
+    private bool development;
+    private bool updateAvailable;
+    private bool dismissed;
+    private bool isChecking;
+    private bool isApplying;
+    private bool disposed;
+    private string? error;
+
+    private string StatusText => development ? "Development - online only"
+        : !online ? offlineReady ? "Offline - ready to study" : "Offline - setup not ready"
+        : offlineReady ? "Ready for offline study"
+        : error is not null ? "Offline access not ready" : "Preparing offline access...";
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            reference = DotNetObjectReference.Create(this);
+            await ConnectAsync();
+        }
+    }
+
+    /// <summary>Receives the browser's connectivity and service-worker state.</summary>
+    /// <param name="isOnline">Whether the browser reports network connectivity.</param>
+    /// <param name="isOfflineReady">Whether a published caching worker controls this page.</param>
+    /// <param name="isDevelopment">Whether the active worker is the online-only development worker.</param>
+    /// <param name="hasUpdate">Whether a fully installed update is waiting.</param>
+    /// <param name="message">An optional setup or update error.</param>
+    /// <returns>A task completed after the status is rendered.</returns>
+    [JSInvokable]
+    public Task NotifyStatus(bool isOnline, bool isOfflineReady, bool isDevelopment, bool hasUpdate, string? message)
+    {
+        if (disposed) return Task.CompletedTask;
+        online = isOnline;
+        offlineReady = isOfflineReady;
+        development = isDevelopment;
+        updateAvailable = hasUpdate;
+        error = message;
+        return InvokeAsync(StateHasChanged);
+    }
+
+    /// <summary>Restores interaction when update activation fails or times out.</summary>
+    /// <param name="message">The recovery instructions supplied by the browser module.</param>
+    /// <returns>A task completed after the error and interactive state are rendered.</returns>
+    [JSInvokable]
+    public async Task UpdateFailed(string message)
+    {
+        if (disposed) return;
+        error = message;
+        isApplying = false;
+        await ApplyingChanged.InvokeAsync(false);
+        await InvokeAsync(StateHasChanged);
+    }
+
+    /// <summary>Pauses interaction and waits for pending progress writes before a worker-triggered reload.</summary>
+    /// <returns>A task completed after already queued progress writes finish.</returns>
+    [JSInvokable]
+    public async Task PrepareForReload()
+    {
+        if (disposed) return;
+        isApplying = true;
+        await ApplyingChanged.InvokeAsync(true);
+        await InvokeAsync(StateHasChanged);
+        await Tracker.WaitForPendingSavesAsync();
+    }
+
+    private async Task ConnectAsync()
+    {
+        try
+        {
+            module ??= await JS.InvokeAsync<IJSObjectReference>("import", "./js/pwa.js");
+            await module.InvokeVoidAsync("initialize", reference);
+        }
+        catch (JSException)
+        {
+            error = "Offline status couldn't be loaded. Reconnect and check for updates to retry.";
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+
+    private async Task CheckForUpdates()
+    {
+        isChecking = true;
+        dismissed = false;
+        try
+        {
+            if (module is null) await ConnectAsync();
+            else await module.InvokeVoidAsync("checkForUpdates");
+        }
+        catch (JSException)
+        {
+            error = "Couldn't check for updates. Try again when connected.";
+        }
+        finally
+        {
+            isChecking = false;
+        }
+    }
+
+    private async Task ApplyUpdate()
+    {
+        try
+        {
+            await PrepareForReload();
+            if (module is null || !await module.InvokeAsync<bool>("applyUpdate"))
+            {
+                isApplying = false;
+                await ApplyingChanged.InvokeAsync(false);
+            }
+        }
+        catch (JSException)
+        {
+            isApplying = false;
+            await ApplyingChanged.InvokeAsync(false);
+            error = "The update couldn't start. Try again or close and reopen the app.";
+        }
+    }
+
+    /// <summary>Releases browser listeners and JavaScript interop references.</summary>
+    /// <returns>A task completed after update-status resources are released.</returns>
+    public async ValueTask DisposeAsync()
+    {
+        disposed = true;
+        try
+        {
+            if (module is not null)
+            {
+                await module.InvokeVoidAsync("dispose");
+                await module.DisposeAsync();
+            }
+        }
+        catch (JSException) { }
+        finally
+        {
+            reference?.Dispose();
+        }
+    }
+}

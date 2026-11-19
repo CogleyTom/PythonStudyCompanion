@@ -6,7 +6,7 @@ No backend, database server, authentication, or Python execution engine is requi
 
 ## Project status
 
-Milestones 1-4 are implemented. Milestone 5 remains: final mobile polish, real-iPhone installation and offline testing, and deployment configuration.
+Milestones 1-4 and the app-side release preparation for Milestone 5 are implemented, including install icons, offline status, and controlled updates. Hosting selection, deployment configuration, and physical-iPhone verification are still pending.
 
 ## Features
 
@@ -16,6 +16,7 @@ Milestones 1-4 are implemented. Milestone 5 remains: final mobile polish, real-i
 - **Coding practice:** Topic and difficulty filters, problem statements, examples, progressive hints, reference solutions, and explanations. Code is displayed, never executed.
 - **Progress:** Local persistence, spaced repetition, topic proficiency, seven-day activity, coding reviews, and JSON backup export/import.
 - **Interface:** Four navigation tabs, responsive layouts, system-aware light/dark mode, and reduced-motion support.
+- **PWA:** Original installation icons, offline-readiness status, and a user-controlled update prompt.
 
 Starter content includes **32 flashcards, 40 quiz questions, and 8 coding exercises** across:
 
@@ -68,6 +69,9 @@ wwwroot\
   data\quizzes.json             Multiple-choice question catalog
   data\coding-exercises.json    Coding exercise catalog
   js\progress.js               Local storage and backup-download interop
+  js\pwa.js                    Offline status and update coordination
+  icon.svg                     Editable source for installation icons
+  apple-touch-icon.png         iPhone home-screen icon
   manifest.webmanifest          PWA installation metadata
   service-worker.js            Development worker without offline caching
   service-worker.published.js  Published offline-caching worker
@@ -155,13 +159,39 @@ The current app assumes deployment at the site's root. Subfolder hosting require
 
 **Offline caching is enabled in published builds, not development runs.** Load the published app online and allow its service worker to finish installing and caching before testing offline.
 
-### iPhone installation target
+The header reports **Ready for offline study** after a published worker has installed and controls the page. A development run instead reports **Development - online only**. Offline status describes the cached application, not the durability of browser storage; keep backups of progress.
 
-After HTTPS deployment, open the site in Safari and use **Share > Add to Home Screen**. Final verification on a physical iPhone is part of Milestone 5, including:
+### App updates
 
-- Installation, app icons, layout, and touch controls.
-- Offline launch and navigation after closing and reopening.
-- Saved progress and backup import/export.
-- App updates without losing progress.
+After a new release is published, the app checks in the background when opened, brought to the foreground, or reconnected. Use **Check for updates** to check manually or reveal a dismissed update prompt.
 
-Deployment configuration and update instructions will be finalized in Milestone 5.
+When a complete update is downloaded, choose **Reload to update** or **Later**. The app does not force an immediate reload just because an update was detected. Once all old app windows close, the browser can also activate a waiting update normally.
+
+Applying an update pauses interaction and waits for pending progress writes before reloading. Other open app tabs also reload when the new worker takes control. Saved records remain in local storage, but current flashcard/quiz sessions restart. A failed download leaves the existing version available. If activation cannot finish, close all open app windows and reopen.
+
+Changing the site's address, clearing website data, or reinstalling can affect local storage. Export a backup first; ordinary updates at the same address do not reset saved progress.
+
+### Hosting requirements
+
+The hosting provider has deliberately not been selected. No provider-specific files or deployed resources are included yet. Before deployment, configure:
+
+- HTTPS and a stable site address.
+- SPA navigation fallback without rewriting missing static assets to HTML.
+- Revalidation for `index.html`, `service-worker.js`, and `service-worker-assets.js`; deploy each complete published output together.
+- Host-appropriate security headers, checked against the published WebAssembly app.
+
+Do not upload source files, `obj`, or development configuration: publish only the generated `wwwroot` contents. Provider-specific routing, cache rules, and headers will be added after hosting is chosen.
+
+### Physical-iPhone checklist
+
+A desktop browser check does not replace these real-device checks. After HTTPS deployment:
+
+1. Open the site in Safari, wait for **Ready for offline study**, then use **Share > Add to Home Screen**. Confirm the icon and standalone appearance.
+2. Launch from the home screen. Check all four tabs in portrait and landscape, safe-area spacing, text size, dark mode, card flips, selects, and touch targets.
+3. Rate a flashcard, answer a quiz question, and mark a coding exercise reviewed. Close and reopen the app and confirm the saved statistics remain.
+4. Enable Airplane Mode with Wi-Fi off, close the app, and reopen it. Visit every tab and start a flashcard, quiz, and coding session.
+5. Export progress to Files while offline. Import that backup, inspect the preview, and verify cancel and confirmed replacement.
+6. Reconnect and publish another release at the same address. Confirm the update prompt, **Later**, and **Reload to update**. Verify saved progress survives and the updated version reopens offline.
+7. If Safari and the home-screen app show different progress, export from the instance containing your records and import into the intended one. Do not assume storage is shared between browser contexts.
+
+Hosting/deployment and completion of this checklist remain the final release steps.

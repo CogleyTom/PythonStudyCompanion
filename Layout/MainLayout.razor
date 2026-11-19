@@ -6,15 +6,17 @@
 <a class="skip-link" href="#main-content">Skip to content</a>
 
 <div class="app-shell">
-    <header class="app-header">
+    <header class="app-header" inert="@isUpdating">
         <a class="brand" href="" aria-label="Python Study Companion home">
-            <span class="brand-mark" aria-hidden="true">&gt;_</span>
+            <img class="brand-mark" src="icon-192.png" width="44" height="44" alt="" />
             <span>Python<span class="brand-subtitle">Study Companion</span></span>
         </a>
         <span class="version-badge">YOUR LEARNING SPACE</span>
     </header>
 
-    <main id="main-content" tabindex="-1">
+    <PwaStatus ApplyingChanged="OnUpdateStateChanged" />
+
+    <main id="main-content" tabindex="-1" inert="@isUpdating">
         @if (Tracker.Error is not null)
         {
             <section class="storage-warning" role="alert" aria-label="Progress storage status">
@@ -28,7 +30,7 @@
         @Body
     </main>
 
-    <nav class="bottom-nav" aria-label="Primary navigation">
+    <nav class="bottom-nav" aria-label="Primary navigation" inert="@isUpdating">
         <NavLink href="" Match="NavLinkMatch.All">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1Z" /></svg>
             <span>Home</span>
@@ -49,6 +51,8 @@
 </div>
 
 @code {
+    private bool isUpdating;
+
     protected override async Task OnInitializedAsync()
     {
         Tracker.Changed += OnProgressChanged;
@@ -56,6 +60,7 @@
     }
 
     private void OnProgressChanged() => _ = InvokeAsync(StateHasChanged);
+    private void OnUpdateStateChanged(bool applying) => isUpdating = applying;
     private void ReloadApp() => Navigation.NavigateTo(Navigation.Uri, forceLoad: true);
 
     /// <summary>Removes the progress-status subscription when the layout is disposed.</summary>

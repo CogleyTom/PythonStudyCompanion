@@ -2,3 +2,8 @@
 // This is because caching would make development more difficult (changes would not
 // be reflected on the first load after each change).
 self.addEventListener('fetch', () => { });
+self.addEventListener('message', event => {
+    if (event.data?.type === 'GET_PWA_STATUS') {
+        event.ports[0]?.postMessage({ offlineReady: false, development: true });
+    }
+});

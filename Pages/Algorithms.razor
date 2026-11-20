@@ -1,0 +1,275 @@
+@page "/practice/algorithms"
+@page "/practice/algorithms/{Id}"
+@implements IAsyncDisposable
+@using System.Text.Json
+@using PythonStudyCompanion.Models
+@using PythonStudyCompanion.Services
+@inject PracticeService Content
+@inject IJSRuntime JS
+
+<PageTitle>@(SelectedLesson?.Title ?? "Algorithm Library") | Python Study Companion</PageTitle>
+
+@if (isLoading)
+{
+    <h1>Algorithm Library</h1>
+    <p role="status">Loading algorithm lessons...</p>
+}
+else if (loadError is not null)
+{
+    <section class="empty-state">
+        <h1>Library couldn't be loaded.</h1>
+        <p role="alert">@loadError</p>
+        <button type="button" class="button" @onclick="LoadAsync">Try again</button>
+    </section>
+}
+else if (SelectedLesson is { } lesson)
+{
+    <article class="algorithm-lesson" @key="lesson.Id">
+        <header class="page-heading">
+            <a class="back-link" href="practice/algorithms">&larr; Algorithm Library</a>
+            <p class="eyebrow">@lesson.Category</p>
+            <h1>@lesson.Title</h1>
+            <span class="pill">@lesson.Difficulty</span>
+            <p class="lesson-description">@lesson.Summary</p>
+        </header>
+        <section class="lesson-section" aria-labelledby="usage-heading">
+            <h2 id="usage-heading">When to use it</h2>
+            <p>@lesson.WhenToUse</p>
+        </section>
+        <section class="lesson-section" aria-labelledby="python-heading">
+            <div class="section-heading">
+                <h2 id="python-heading">Python example</h2>
+                <button type="button" class="button button-secondary" disabled="@(!codeReady)" @ref="copyButton">Copy code</button>
+            </div>
+            <p class="muted">@lesson.ExampleInput. Reference only; code is not executed in this app.</p>
+            <pre class="code-block python-code" tabindex="0" aria-label="Python example; scroll horizontally for long lines"><code @ref="codeElement">@lesson.Code</code></pre>
+            <p class="muted" role="status" @ref="copyStatus">@codeMessage</p>
+        </section>
+        <details class="lesson-section lesson-details" open>
+            <summary>Step-by-step walkthrough</summary>
+            <ol>
+                @foreach (var step in lesson.Walkthrough)
+                {
+                    <li>@step</li>
+                }
+            </ol>
+        </details>
+        <section class="lesson-section" aria-labelledby="complexity-heading">
+            <h2 id="complexity-heading">Complexity</h2>
+            <dl class="complexity-grid">
+                <div><dt>Time</dt><dd>@lesson.TimeComplexity</dd></div>
+                <div><dt>Space</dt><dd>@lesson.SpaceComplexity</dd></div>
+            </dl>
+            <details class="lesson-details" open>
+                <summary>Why these bounds?</summary>
+                <p>@lesson.ComplexityExplanation</p>
+            </details>
+        </section>
+        <details class="lesson-section lesson-details" open>
+            <summary>Common mistakes</summary>
+            <ul>
+                @foreach (var mistake in lesson.CommonMistakes)
+                {
+                    <li>@mistake</li>
+                }
+            </ul>
+        </details>
+        <nav class="study-toolbar lesson-navigation" aria-label="Lesson navigation">
+            @if (PreviousLesson is { } previous)
+            {
+                <a class="button button-secondary" href="@LessonUrl(previous)">&larr; Previous lesson</a>
+            }
+            @if (NextLesson is { } next)
+            {
+                <a class="button" href="@LessonUrl(next)">Next lesson &rarr;</a>
+            }
+        </nav>
+    </article>
+}
+else if (Id is not null)
+{
+    <section class="empty-state">
+        <h1>Lesson not found.</h1>
+        <p>This algorithm isn't in the library.</p>
+        <a class="button" href="practice/algorithms">Browse the library</a>
+    </section>
+}
+else
+{
+    var filtered = FilteredLessons.ToArray();
+    <section class="page-heading">
+        <a class="back-link" href="practice">&larr; Practice</a>
+        <p class="eyebrow">UNDERSTAND THE PATTERN.</p>
+        <h1>Algorithm Library</h1>
+        <p>A reference for Python approaches, worked examples, and complexity. Read at your own pace.</p>
+    </section>
+    <div class="library-filters">
+        <label class="session-length library-search">
+            Search lessons
+            <input type="search" placeholder="Title, pattern, or Python code" @bind="search" @bind:event="oninput" />
+        </label>
+        <label class="session-length">
+            Category
+            <select @bind="category">
+                <option value="">All categories</option>
+                @foreach (var name in lessons.Select(item => item.Category).Distinct())
+                {
+                    <option value="@name">@name</option>
+                }
+            </select>
+        </label>
+        <label class="session-length">
+            Difficulty
+            <select @bind="difficulty">
+                <option value="">All levels</option>
+                <option>Beginner</option>
+                <option>Intermediate</option>
+                <option>Advanced</option>
+            </select>
+        </label>
+        <label class="session-length">
+            Sort within categories
+            <select @bind="sort">
+                <option value="order">Learning order</option>
+                <option value="difficulty">Difficulty</option>
+            </select>
+        </label>
+    </div>
+    <div class="section-heading">
+        <p class="muted" role="status">@filtered.Length of @lessons.Count lessons</p>
+        <button type="button" class="text-button" @onclick="ClearFilters">Clear filters</button>
+    </div>
+    @if (filtered.Length == 0)
+    {
+        <section class="empty-state">
+            <h2>@(lessons.Count == 0 ? "No lessons yet." : "No matching lessons.")</h2>
+            <p>Try clearing the filters or searching for another pattern.</p>
+        </section>
+    }
+    @foreach (var group in filtered.GroupBy(item => item.Category))
+    {
+        <section class="algorithm-category" aria-label="@group.Key">
+            <div class="section-heading"><h2>@group.Key</h2><span class="muted">@group.Count() lessons</span></div>
+            <div class="action-grid">
+                @foreach (var item in group)
+                {
+                    <a class="action-card algorithm-card" href="@LessonUrl(item)" @key="item.Id">
+                        <span class="pill">@item.Difficulty</span>
+                        <h3>@item.Title</h3>
+                        <p>@item.Summary</p>
+                        <span class="muted">Time: @item.TimeComplexity</span>
+                        <span class="text-link">Read lesson &rarr;</span>
+                    </a>
+                }
+            </div>
+        </section>
+    }
+}
+
+@code {
+    /// <summary>Gets or sets the lesson identifier from the route.</summary>
+    /// <value>A catalog ID for a detail page, or null for the library index.</value>
+    [Parameter]
+    public string? Id { get; set; }
+
+    private IReadOnlyList<AlgorithmLesson> lessons = [];
+    private bool isLoading = true;
+    private string? loadError;
+    private string category = "";
+    private string difficulty = "";
+    private string search = "";
+    private string sort = "order";
+    private IJSObjectReference? module;
+    private ElementReference codeElement;
+    private ElementReference copyButton;
+    private ElementReference copyStatus;
+    private string? enhancedId;
+    private string? codeMessage;
+    private bool codeReady;
+
+    private AlgorithmLesson? SelectedLesson => lessons.FirstOrDefault(item => item.Id == Id);
+    private AlgorithmLesson? PreviousLesson => lessons.LastOrDefault(item => item.Order < SelectedLesson?.Order);
+    private AlgorithmLesson? NextLesson => lessons.FirstOrDefault(item => item.Order > SelectedLesson?.Order);
+    private IEnumerable<AlgorithmLesson> FilteredLessons
+    {
+        get
+        {
+            var query = search.Trim();
+            var filtered = lessons.Where(item => (category.Length == 0 || item.Category == category)
+                && (difficulty.Length == 0 || item.Difficulty == difficulty)
+                && (query.Length == 0 || new[] { item.Title, item.Category, item.Summary, item.WhenToUse, item.Code }
+                    .Any(value => value.Contains(query, StringComparison.OrdinalIgnoreCase))));
+            return filtered.OrderBy(item => lessons.First(lesson => lesson.Category == item.Category).Order)
+                .ThenBy(item => sort == "difficulty" ? DifficultyRank(item.Difficulty) : item.Order)
+                .ThenBy(item => item.Order);
+        }
+    }
+
+    protected override Task OnInitializedAsync() => LoadAsync();
+
+    protected override void OnParametersSet()
+    {
+        enhancedId = null;
+        codeReady = false;
+        codeMessage = null;
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (SelectedLesson is { } lesson && enhancedId != lesson.Id)
+        {
+            enhancedId = lesson.Id;
+            try
+            {
+                module ??= await JS.InvokeAsync<IJSObjectReference>("import", "./js/algorithms.js");
+                if (Id != lesson.Id) return;
+                await module.InvokeVoidAsync("enhance", codeElement, copyButton, copyStatus);
+                if (Id != lesson.Id) return;
+                codeReady = true;
+            }
+            catch (JSException)
+            {
+                codeMessage = "Code tools couldn't load. Select the code to copy it manually.";
+            }
+            StateHasChanged();
+        }
+    }
+
+    private async Task LoadAsync()
+    {
+        isLoading = true;
+        loadError = null;
+        enhancedId = null;
+        try
+        {
+            lessons = await Content.LoadAlgorithmsAsync();
+        }
+        catch (Exception exception) when (exception is HttpRequestException or JsonException or OperationCanceledException)
+        {
+            loadError = "The lesson file couldn't be read. Check your connection or cached app version, then try again.";
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private void ClearFilters()
+    {
+        category = difficulty = search = "";
+        sort = "order";
+    }
+
+    private static int DifficultyRank(string level) => level switch { "Beginner" => 0, "Intermediate" => 1, _ => 2 };
+    private static string LessonUrl(AlgorithmLesson lesson) => $"practice/algorithms/{lesson.Id}";
+
+    /// <summary>Releases the syntax-highlighting and clipboard module reference.</summary>
+    /// <returns>A task completed after the module reference is released.</returns>
+    public async ValueTask DisposeAsync()
+    {
+        if (module is not null)
+        {
+            await module.DisposeAsync();
+        }
+    }
+}

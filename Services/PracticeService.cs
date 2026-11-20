@@ -5,7 +5,7 @@ using PythonStudyCompanion.Models;
 namespace PythonStudyCompanion.Services;
 
 /// <summary>
-/// Loads and validates the locally hosted quiz and coding content.
+/// Loads and validates the locally hosted quiz, coding, and algorithm reference content.
 /// </summary>
 public sealed class PracticeService
 {
@@ -88,5 +88,43 @@ public sealed class PracticeService
         }
 
         return exercises;
+    }
+
+    /// <summary>Loads and validates the algorithm reference catalog.</summary>
+    /// <returns>The lessons sorted by their recommended learning order.</returns>
+    /// <exception cref="HttpRequestException">The library file cannot be retrieved.</exception>
+    /// <exception cref="OperationCanceledException">The request times out or is canceled.</exception>
+    /// <exception cref="JsonException">The catalog version or lesson content is invalid.</exception>
+    public async Task<IReadOnlyList<AlgorithmLesson>> LoadAlgorithmsAsync()
+    {
+        var library = await http.GetFromJsonAsync<AlgorithmLibrary>("data/python_algorithm_library.json")
+            ?? throw new JsonException("The algorithm library must contain a catalog object.");
+        if (library.SchemaVersion != 1 || string.IsNullOrWhiteSpace(library.Title) || library.Algorithms is null)
+        {
+            throw new JsonException("The algorithm library needs a supported schema version, title, and lesson array.");
+        }
+
+        var identifiers = new HashSet<string>(StringComparer.Ordinal);
+        var orders = new HashSet<int>();
+        foreach (var lesson in library.Algorithms)
+        {
+            if (lesson is null ||
+                string.IsNullOrWhiteSpace(lesson.Id) ||
+                !lesson.Id.All(character => char.IsAsciiLetterOrDigit(character) || character is '-' or '_') ||
+                !identifiers.Add(lesson.Id) ||
+                lesson.Order < 1 || !orders.Add(lesson.Order) ||
+                lesson.Difficulty is not ("Beginner" or "Intermediate" or "Advanced") ||
+                lesson.Language != "python" ||
+                new[] { lesson.Title, lesson.Category, lesson.Summary, lesson.WhenToUse, lesson.Code,
+                    lesson.ExampleInput, lesson.TimeComplexity, lesson.SpaceComplexity, lesson.ComplexityExplanation }
+                    .Any(string.IsNullOrWhiteSpace) ||
+                lesson.Walkthrough is not { Length: > 0 } || lesson.Walkthrough.Any(string.IsNullOrWhiteSpace) ||
+                lesson.CommonMistakes is not { Length: > 0 } || lesson.CommonMistakes.Any(string.IsNullOrWhiteSpace))
+            {
+                throw new JsonException("Each algorithm needs a unique URL-safe ID and positive order, a valid difficulty, Python code, and complete lesson explanations.");
+            }
+        }
+
+        return library.Algorithms.OrderBy(lesson => lesson.Order).ToArray();
     }
 }

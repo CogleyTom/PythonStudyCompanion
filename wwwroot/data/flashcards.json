@@ -8,14 +8,14 @@
   {
     "id": "fundamentals-comparison",
     "topic": "Python Fundamentals",
-    "front": "What is the difference between = and == in Python?",
-    "back": "= assigns a value to a target, such as a variable name.\n== compares two values for equality and usually produces True or False.\n\ncount = 3\ncount == 3  # True"
+    "front": "What is the difference between = and ==?",
+    "back": "= assigns a value; == compares two values for equality."
   },
   {
     "id": "fundamentals-truthiness",
     "topic": "Python Fundamentals",
-    "front": "Is an empty list true or false? What does this code print?\n\nitems = []\nif not items:\n    print('Empty')",
-    "back": "An empty list is falsy, so the code prints Empty.\n\nNone, False, numeric zero, and empty built-in containers are also falsy."
+    "front": "What is the output of bool([])?",
+    "back": "False. Empty collections are falsy."
   },
   {
     "id": "fundamentals-range",
@@ -24,10 +24,88 @@
     "back": "[1, 2, 3, 4]\n\nrange includes the start but excludes the stop. Its default step is 1."
   },
   {
+    "id": "py-001",
+    "topic": "Python Fundamentals",
+    "front": "What does len() return?",
+    "back": "The number of items in a collection. Example: len([4, 8, 12]) returns 3."
+  },
+  {
+    "id": "py-002",
+    "topic": "Python Fundamentals",
+    "front": "What does range(3) produce?",
+    "back": "The integers 0, 1, 2. The stop value is excluded."
+  },
+  {
+    "id": "py-004",
+    "topic": "Python Fundamentals",
+    "front": "What does // do?",
+    "back": "Floor division. Example: 7 // 2 returns 3."
+  },
+  {
+    "id": "py-005",
+    "topic": "Python Fundamentals",
+    "front": "What does % do?",
+    "back": "Returns the remainder. Example: 7 % 2 returns 1."
+  },
+  {
+    "id": "py-022",
+    "topic": "Python Fundamentals",
+    "front": "How do you convert '42' to an integer?",
+    "back": "int('42') returns 42."
+  },
+  {
+    "id": "py-023",
+    "topic": "Python Fundamentals",
+    "front": "What does a negative list index mean?",
+    "back": "It counts backward from the end. -1 is the last item."
+  },
+  {
+    "id": "py-024",
+    "topic": "Python Fundamentals",
+    "front": "What does nums[1:4] return?",
+    "back": "Items at indices 1, 2, and 3."
+  },
+  {
+    "id": "py-025",
+    "topic": "Python Fundamentals",
+    "front": "How do you check if x is in a list?",
+    "back": "Use x in items; returns True or False."
+  },
+  {
+    "id": "py-026",
+    "topic": "Python Fundamentals",
+    "front": "How do you loop through values and indices?",
+    "back": "for i, value in enumerate(items):"
+  },
+  {
+    "id": "py-027",
+    "topic": "Python Fundamentals",
+    "front": "What does range(2, 8, 2) produce?",
+    "back": "2, 4, 6."
+  },
+  {
+    "id": "py-028",
+    "topic": "Python Fundamentals",
+    "front": "What does break do in a loop?",
+    "back": "Immediately exits the nearest loop."
+  },
+  {
+    "id": "py-029",
+    "topic": "Python Fundamentals",
+    "front": "What does continue do in a loop?",
+    "back": "Skips the rest of the current iteration."
+  },
+  {
+    "id": "py-030",
+    "topic": "Python Fundamentals",
+    "front": "What is a list comprehension?",
+    "back": "A compact list builder: [x*x for x in nums]."
+  },
+  {
     "id": "functions-return",
     "topic": "Python Functions",
-    "front": "How do return and print differ inside a function?",
-    "back": "return sends a value back to the caller and exits that function call.\nprint writes text to an output stream. Printing a value does not return it from the surrounding function."
+    "front": "What is the difference between print and return?",
+    "back": "print displays output; return gives a value to the caller."
   },
   {
     "id": "functions-none",
@@ -48,6 +126,54 @@
     "back": "'Hi, Sam'\n\nname receives the positional argument 'Sam'. The keyword argument prefix='Hi' overrides the default."
   },
   {
+    "id": "py-013",
+    "topic": "Python Functions",
+    "front": "What does return do?",
+    "back": "Ends the function call and sends a value back to the caller."
+  },
+  {
+    "id": "py-038",
+    "topic": "Python Functions",
+    "front": "What is a function's default parameter?",
+    "back": "A fallback value: def greet(name='Guest'):"
+  },
+  {
+    "id": "py-039",
+    "topic": "Python Functions",
+    "front": "What does *args collect?",
+    "back": "Extra positional arguments in a tuple."
+  },
+  {
+    "id": "py-040",
+    "topic": "Python Functions",
+    "front": "What does **kwargs collect?",
+    "back": "Extra keyword arguments in a dictionary."
+  },
+  {
+    "id": "py-042",
+    "topic": "Python Functions",
+    "front": "What does any([False, True]) return?",
+    "back": "True. At least one element is truthy."
+  },
+  {
+    "id": "py-043",
+    "topic": "Python Functions",
+    "front": "What does all([True, False]) return?",
+    "back": "False. Not every element is truthy."
+  },
+  {
+    "id": "py-044",
+    "topic": "Python Functions",
+    "front": "What does zip(a, b) do?",
+    "back": "Pairs corresponding elements, stopping at the shorter iterable."
+  },
+  {
+    "id": "py-045",
+    "topic": "Python Functions",
+    "front": "What is a lambda function?",
+    "back": "A small anonymous function: lambda x: x * 2."
+  },
+  {
     "id": "collections-list-tuple",
     "topic": "Lists, Tuples, Sets, and Dictionaries",
     "front": "What is the main difference between a list and a tuple?",
@@ -62,14 +188,98 @@
   {
     "id": "collections-dictionary",
     "topic": "Lists, Tuples, Sets, and Dictionaries",
-    "front": "How do scores['Sam'] and scores.get('Sam', 0) differ when 'Sam' is missing?",
-    "back": "scores['Sam'] raises KeyError in a regular dictionary.\nscores.get('Sam', 0) returns 0 instead and does not add the missing key."
+    "front": "What does dict.get(key, 0) do?",
+    "back": "Returns the key's value, or 0 if the key is missing."
   },
   {
     "id": "collections-alias",
     "topic": "Lists, Tuples, Sets, and Dictionaries",
     "front": "What does this print?\n\na = [1, 2]\nb = a\nb.append(3)\nprint(a)",
     "back": "[1, 2, 3]\n\na and b refer to the same list. Assignment does not copy it. Use a.copy() for a shallow copy when that is what you need."
+  },
+  {
+    "id": "py-006",
+    "topic": "Lists, Tuples, Sets, and Dictionaries",
+    "front": "How do you add an item to a list?",
+    "back": "Use append(): numbers.append(5)."
+  },
+  {
+    "id": "py-007",
+    "topic": "Lists, Tuples, Sets, and Dictionaries",
+    "front": "How do you access the last list item?",
+    "back": "Use index -1. Example: numbers[-1]."
+  },
+  {
+    "id": "py-008",
+    "topic": "Lists, Tuples, Sets, and Dictionaries",
+    "front": "What does list.pop() do?",
+    "back": "Removes and returns the last item by default."
+  },
+  {
+    "id": "py-009",
+    "topic": "Lists, Tuples, Sets, and Dictionaries",
+    "front": "What is a set useful for?",
+    "back": "Storing unique values and checking membership efficiently."
+  },
+  {
+    "id": "py-010",
+    "topic": "Lists, Tuples, Sets, and Dictionaries",
+    "front": "What does set.add(x) do?",
+    "back": "Adds x if it is not already in the set."
+  },
+  {
+    "id": "py-012",
+    "topic": "Lists, Tuples, Sets, and Dictionaries",
+    "front": "How do you count occurrences with a dictionary?",
+    "back": "counts[x] = counts.get(x, 0) + 1"
+  },
+  {
+    "id": "py-031",
+    "topic": "Lists, Tuples, Sets, and Dictionaries",
+    "front": "What does sorted(nums) do?",
+    "back": "Returns a new sorted list; leaves nums unchanged."
+  },
+  {
+    "id": "py-032",
+    "topic": "Lists, Tuples, Sets, and Dictionaries",
+    "front": "How does nums.sort() differ from sorted(nums)?",
+    "back": "sort() changes the list in place and returns None."
+  },
+  {
+    "id": "py-033",
+    "topic": "Lists, Tuples, Sets, and Dictionaries",
+    "front": "What does dict.items() return?",
+    "back": "A view of key-value pairs, useful for iteration."
+  },
+  {
+    "id": "py-034",
+    "topic": "Lists, Tuples, Sets, and Dictionaries",
+    "front": "How do you safely test if a dictionary has a key?",
+    "back": "Use key in data."
+  },
+  {
+    "id": "py-035",
+    "topic": "Lists, Tuples, Sets, and Dictionaries",
+    "front": "What does set intersection mean?",
+    "back": "Values shared by both sets: a & b."
+  },
+  {
+    "id": "py-036",
+    "topic": "Lists, Tuples, Sets, and Dictionaries",
+    "front": "How do you remove duplicates while keeping order?",
+    "back": "list(dict.fromkeys(items))"
+  },
+  {
+    "id": "py-037",
+    "topic": "Lists, Tuples, Sets, and Dictionaries",
+    "front": "What is an immutable Python sequence?",
+    "back": "A tuple; its elements cannot be reassigned."
+  },
+  {
+    "id": "py-041",
+    "topic": "Lists, Tuples, Sets, and Dictionaries",
+    "front": "What is the result of [1, 2] + [3]?",
+    "back": "[1, 2, 3]. The lists are concatenated."
   },
   {
     "id": "oop-class-instance",
@@ -80,32 +290,62 @@
   {
     "id": "oop-self",
     "topic": "Object-Oriented Programming",
-    "front": "What does self represent in a typical Python instance method?",
-    "back": "self refers to the instance receiving the method call. Python supplies it when a bound method is called.\n\nself is a naming convention, not a reserved keyword."
+    "front": "What does self refer to?",
+    "back": "The current instance of the class."
   },
   {
     "id": "oop-init",
     "topic": "Object-Oriented Programming",
-    "front": "What is the purpose of __init__?",
-    "back": "__init__ initializes an instance after it has been created, often by assigning attributes such as self.name.\n\nIt must not return a value other than None."
+    "front": "What does __init__ do in a Python class?",
+    "back": "Initializes a new instance when it is created."
   },
   {
     "id": "oop-inheritance",
     "topic": "Object-Oriented Programming",
-    "front": "What does inheritance let a subclass do?",
-    "back": "A subclass can reuse and extend behavior from a base class. It can override a method to provide different behavior.\n\nUse inheritance for a meaningful is-a relationship, not just to avoid repeating code."
+    "front": "What is inheritance?",
+    "back": "A class derives behavior and attributes from another class."
+  },
+  {
+    "id": "py-046",
+    "topic": "Object-Oriented Programming",
+    "front": "What is a class attribute?",
+    "back": "An attribute defined on the class and shared unless overridden."
+  },
+  {
+    "id": "py-047",
+    "topic": "Object-Oriented Programming",
+    "front": "What is an instance attribute?",
+    "back": "Data stored on one object, usually through self."
+  },
+  {
+    "id": "py-049",
+    "topic": "Object-Oriented Programming",
+    "front": "What is method overriding?",
+    "back": "A subclass provides its own implementation of an inherited method."
+  },
+  {
+    "id": "py-050",
+    "topic": "Object-Oriented Programming",
+    "front": "What does __str__ define?",
+    "back": "A human-readable string representation of an object."
+  },
+  {
+    "id": "py-051",
+    "topic": "Object-Oriented Programming",
+    "front": "What is a Python property?",
+    "back": "An attribute-like interface to a method, often using @property."
   },
   {
     "id": "structures-stack",
     "topic": "Data Structures",
-    "front": "What does LIFO mean, and how can a Python list act as a stack?",
-    "back": "Last In, First Out: the most recently added item is removed first.\n\nUse items.append(value) to push and items.pop() to remove the last item. Popping an empty list raises IndexError."
+    "front": "What is a stack?",
+    "back": "Last In, First Out (LIFO)."
   },
   {
     "id": "structures-queue",
     "topic": "Data Structures",
-    "front": "What does FIFO mean, and which standard-library container is useful for a queue?",
-    "back": "First In, First Out: the earliest added item is removed first.\n\ncollections.deque supports append() to add at the right and popleft() to remove from the left efficiently."
+    "front": "What is a queue?",
+    "back": "First In, First Out (FIFO)."
   },
   {
     "id": "structures-hash-map",
@@ -118,6 +358,72 @@
     "topic": "Data Structures",
     "front": "What is a leaf in a tree data structure?",
     "back": "A leaf is a node with no children.\n\nThe root is the top node. A tree with just one node has a root that is also a leaf."
+  },
+  {
+    "id": "py-053",
+    "topic": "Data Structures",
+    "front": "How do you implement a basic stack with a list?",
+    "back": "Use append(x) to push and pop() to remove."
+  },
+  {
+    "id": "py-055",
+    "topic": "Data Structures",
+    "front": "How do you implement an efficient FIFO queue?",
+    "back": "Use collections.deque with append() and popleft()."
+  },
+  {
+    "id": "py-056",
+    "topic": "Data Structures",
+    "front": "What does collections.Counter do?",
+    "back": "Counts occurrences: Counter('aba') gives a:2 and b:1."
+  },
+  {
+    "id": "py-057",
+    "topic": "Data Structures",
+    "front": "What does defaultdict(int) provide?",
+    "back": "Missing keys start at 0 when accessed."
+  },
+  {
+    "id": "py-058",
+    "topic": "Data Structures",
+    "front": "What is a hashable object?",
+    "back": "An object with a stable hash and compatible equality behavior."
+  },
+  {
+    "id": "py-059",
+    "topic": "Data Structures",
+    "front": "Why are lists invalid dictionary keys?",
+    "back": "Lists are mutable and unhashable."
+  },
+  {
+    "id": "py-060",
+    "topic": "Data Structures",
+    "front": "What is average dictionary lookup complexity?",
+    "back": "O(1) average; O(n) worst case."
+  },
+  {
+    "id": "py-090",
+    "topic": "Data Structures",
+    "front": "What is a binary search tree's ordering rule?",
+    "back": "Left subtree values are smaller; right subtree values are larger."
+  },
+  {
+    "id": "py-091",
+    "topic": "Data Structures",
+    "front": "What is inorder traversal of a BST?",
+    "back": "Left, root, right; yields sorted values for a valid BST."
+  },
+  {
+    "id": "py-092",
+    "topic": "Data Structures",
+    "front": "What is a min-heap?",
+    "back": "A heap where each parent is no greater than its children."
+  },
+  {
+    "id": "py-093",
+    "topic": "Data Structures",
+    "front": "What does heapq.heappop(heap) return?",
+    "back": "The smallest item, in O(log n) time."
   },
   {
     "id": "algorithms-linear-search",
@@ -140,8 +446,212 @@
   {
     "id": "algorithms-base-case",
     "topic": "Algorithms and Coding Patterns",
-    "front": "Why does a recursive function need a base case?",
-    "back": "A base case supplies an answer without making another recursive call. Recursive steps must move toward it.\n\nWithout a reachable stopping condition, recursion can continue until Python raises RecursionError."
+    "front": "Why does recursion need a base case?",
+    "back": "To stop recursive calls and prevent unbounded recursion."
+  },
+  {
+    "id": "py-017",
+    "topic": "Algorithms and Coding Patterns",
+    "front": "What is the two-pointer technique?",
+    "back": "Using two indices to traverse data, often from opposite ends."
+  },
+  {
+    "id": "py-018",
+    "topic": "Algorithms and Coding Patterns",
+    "front": "What is a sliding window?",
+    "back": "A moving contiguous range used to process sequences efficiently."
+  },
+  {
+    "id": "py-061",
+    "topic": "Algorithms and Coding Patterns",
+    "front": "How does a HashSet-style seen check work in Python?",
+    "back": "if x in seen: ...; then seen.add(x)."
+  },
+  {
+    "id": "py-062",
+    "topic": "Algorithms and Coding Patterns",
+    "front": "How can a set detect duplicate numbers?",
+    "back": "If x is already in seen, it is a duplicate."
+  },
+  {
+    "id": "py-063",
+    "topic": "Algorithms and Coding Patterns",
+    "front": "What is the Two Sum complement?",
+    "back": "target - current_number."
+  },
+  {
+    "id": "py-064",
+    "topic": "Algorithms and Coding Patterns",
+    "front": "Why use a dictionary for Two Sum?",
+    "back": "It maps seen values to indices for O(1) average lookup."
+  },
+  {
+    "id": "py-065",
+    "topic": "Algorithms and Coding Patterns",
+    "front": "When do opposite-end two pointers work well?",
+    "back": "When the data is sorted and pointer movement can eliminate candidates."
+  },
+  {
+    "id": "py-066",
+    "topic": "Algorithms and Coding Patterns",
+    "front": "How do you initialize opposite-end pointers?",
+    "back": "left, right = 0, len(nums) - 1"
+  },
+  {
+    "id": "py-067",
+    "topic": "Algorithms and Coding Patterns",
+    "front": "How do pointers move for a sorted pair sum?",
+    "back": "Sum too small: left += 1. Too large: right -= 1."
+  },
+  {
+    "id": "py-068",
+    "topic": "Algorithms and Coding Patterns",
+    "front": "What is a fixed-size sliding window?",
+    "back": "A contiguous range of constant length that moves across data."
+  },
+  {
+    "id": "py-069",
+    "topic": "Algorithms and Coding Patterns",
+    "front": "How do you update a moving window sum?",
+    "back": "Add the entering value and subtract the leaving value."
+  },
+  {
+    "id": "py-070",
+    "topic": "Algorithms and Coding Patterns",
+    "front": "When is a variable-size sliding window useful?",
+    "back": "When a contiguous range can expand or shrink under a condition."
+  },
+  {
+    "id": "py-071",
+    "topic": "Algorithms and Coding Patterns",
+    "front": "What is a prefix sum?",
+    "back": "A running total used to calculate range sums efficiently."
+  },
+  {
+    "id": "py-072",
+    "topic": "Algorithms and Coding Patterns",
+    "front": "How do you get a range sum from prefix sums?",
+    "back": "For inclusive l..r: prefix[r+1] - prefix[l]."
+  },
+  {
+    "id": "py-073",
+    "topic": "Algorithms and Coding Patterns",
+    "front": "What is binary search's time complexity?",
+    "back": "O(log n) for sorted random-access data."
+  },
+  {
+    "id": "py-074",
+    "topic": "Algorithms and Coding Patterns",
+    "front": "How do you calculate a binary-search midpoint?",
+    "back": "mid = (left + right) // 2"
+  },
+  {
+    "id": "py-075",
+    "topic": "Algorithms and Coding Patterns",
+    "front": "When can binary search discard half the range?",
+    "back": "When a sorted or monotonic condition identifies the correct half."
+  },
+  {
+    "id": "py-076",
+    "topic": "Algorithms and Coding Patterns",
+    "front": "What is linear search complexity?",
+    "back": "O(n) worst-case time."
+  },
+  {
+    "id": "py-077",
+    "topic": "Algorithms and Coding Patterns",
+    "front": "What is merge sort's time complexity?",
+    "back": "O(n log n) worst-case time."
+  },
+  {
+    "id": "py-078",
+    "topic": "Algorithms and Coding Patterns",
+    "front": "What is Python's built-in sorting algorithm?",
+    "back": "Timsort, a stable adaptive sorting algorithm."
+  },
+  {
+    "id": "py-079",
+    "topic": "Algorithms and Coding Patterns",
+    "front": "What is a stable sort?",
+    "back": "Equal-key elements keep their original relative order."
+  },
+  {
+    "id": "py-080",
+    "topic": "Algorithms and Coding Patterns",
+    "front": "What does sorted(words, key=len) do?",
+    "back": "Sorts strings by length."
+  },
+  {
+    "id": "py-081",
+    "topic": "Algorithms and Coding Patterns",
+    "front": "What is recursion?",
+    "back": "A function calling itself to solve smaller subproblems."
+  },
+  {
+    "id": "py-083",
+    "topic": "Algorithms and Coding Patterns",
+    "front": "What is the call stack?",
+    "back": "The structure tracking active function calls and local state."
+  },
+  {
+    "id": "py-084",
+    "topic": "Algorithms and Coding Patterns",
+    "front": "What is depth-first search (DFS)?",
+    "back": "Explore one branch deeply before backtracking."
+  },
+  {
+    "id": "py-085",
+    "topic": "Algorithms and Coding Patterns",
+    "front": "What is breadth-first search (BFS)?",
+    "back": "Explore nodes level by level using a queue."
+  },
+  {
+    "id": "py-086",
+    "topic": "Algorithms and Coding Patterns",
+    "front": "What is BFS complexity on an adjacency list?",
+    "back": "O(V + E) time for vertices V and edges E."
+  },
+  {
+    "id": "py-087",
+    "topic": "Algorithms and Coding Patterns",
+    "front": "When does BFS find a shortest path?",
+    "back": "In an unweighted graph, it finds a path with the fewest edges."
+  },
+  {
+    "id": "py-088",
+    "topic": "Algorithms and Coding Patterns",
+    "front": "What is an adjacency list?",
+    "back": "A mapping from each vertex to its neighboring vertices."
+  },
+  {
+    "id": "py-089",
+    "topic": "Algorithms and Coding Patterns",
+    "front": "Why use a visited set in graph traversal?",
+    "back": "To avoid revisiting vertices and getting stuck in cycles."
+  },
+  {
+    "id": "py-094",
+    "topic": "Algorithms and Coding Patterns",
+    "front": "What is backtracking?",
+    "back": "Try a choice, explore, then undo it to try alternatives."
+  },
+  {
+    "id": "py-095",
+    "topic": "Algorithms and Coding Patterns",
+    "front": "What is dynamic programming?",
+    "back": "Solve overlapping subproblems once and reuse their results."
+  },
+  {
+    "id": "py-096",
+    "topic": "Algorithms and Coding Patterns",
+    "front": "What is memoization?",
+    "back": "Caching computed results, often with functools.cache."
+  },
+  {
+    "id": "py-097",
+    "topic": "Algorithms and Coding Patterns",
+    "front": "What is tabulation?",
+    "back": "Bottom-up dynamic programming using stored subproblem results."
   },
   {
     "id": "complexity-meaning",
@@ -152,20 +662,38 @@
   {
     "id": "complexity-linear",
     "topic": "Big O Complexity",
-    "front": "What is the time complexity of one loop that visits n items once, doing constant work per item?",
-    "back": "O(n) time.\n\nThe work grows in proportion to the number of items. Doubling n roughly doubles the repeated work under these assumptions."
+    "front": "What is O(n) time complexity?",
+    "back": "Work that grows linearly with input size."
   },
   {
     "id": "complexity-nested",
     "topic": "Big O Complexity",
-    "front": "What is the time complexity of two nested loops when each runs n times and the inner body does constant work?",
-    "back": "O(n squared), also written O(n^2).\n\nThe inner body runs n times for each of the n outer iterations, for n * n total executions."
+    "front": "What is the complexity of two nested n-loops?",
+    "back": "O(n\u00b2) when each loop runs n times."
   },
   {
     "id": "complexity-space",
     "topic": "Big O Complexity",
     "front": "What is the auxiliary space complexity of copying n list references into a new list?",
     "back": "O(n) auxiliary space.\n\nThe new list needs storage proportional to n. A shallow copy copies references; it does not recursively copy the referenced objects."
+  },
+  {
+    "id": "py-019",
+    "topic": "Big O Complexity",
+    "front": "What is O(1) time complexity?",
+    "back": "Constant-time work independent of input size."
+  },
+  {
+    "id": "py-099",
+    "topic": "Big O Complexity",
+    "front": "What is amortized O(1) list append?",
+    "back": "Average constant work per append across many operations."
+  },
+  {
+    "id": "py-100",
+    "topic": "Big O Complexity",
+    "front": "What is the key space-time tradeoff in hashing?",
+    "back": "Use extra O(n) storage to achieve O(n) average-time lookups across n items."
   },
   {
     "id": "interview-clarify",

@@ -1,0 +1,8 @@
+/flashcards       /index.html  200
+/practice         /index.html  200
+/practice/quiz    /index.html  200
+/practice/coding  /index.html  200
+/practice/algorithms  /index.html  200
+/practice/algorithms/*  /index.html  200
+/progress         /index.html  200
+/not-found        /index.html  200

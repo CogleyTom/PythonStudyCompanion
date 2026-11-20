@@ -6,7 +6,7 @@ No backend, database server, authentication, or Python execution engine is requi
 
 ## Project status
 
-Milestones 1-4 and the app-side release preparation for Milestone 5 are implemented, including install icons, offline status, and controlled updates. Hosting selection, deployment configuration, and physical-iPhone verification are still pending.
+Milestones 1-4 and the app-side release preparation for Milestone 5 are implemented, including install icons, offline status, controlled updates, and static-host routing/header configuration. Cloudflare Pages deployment and physical-iPhone verification are still pending.
 
 ## Features
 
@@ -14,11 +14,12 @@ Milestones 1-4 and the app-side release preparation for Milestone 5 are implemen
 - **Flashcards:** Topic selection, 5/10/15-card session limits, tap-to-flip cards, navigation, shuffle within review priorities, and Again/Good/Easy ratings.
 - **Quizzes:** Topic selection, 5/10/15-question rounds, immediate feedback and explanations, scores, missed-question review, and saved quiz history. Smaller topic selections use the available questions without adding duplicates.
 - **Coding practice:** Topic and difficulty filters, problem statements, examples, progressive hints, reference solutions, and explanations. Code is displayed, never executed.
+- **Algorithm Library:** Open **Practice > Algorithm Library** for 20 reference lessons, grouped categories, category/difficulty filters, live search, and learning-order or difficulty sorting. Each linked lesson includes the original Python example, syntax highlighting, Copy code, collapsible walkthroughs, complexity, and common mistakes.
 - **Progress:** Local persistence, spaced repetition, topic proficiency, seven-day activity, coding reviews, and JSON backup export/import.
 - **Interface:** Four navigation tabs, responsive layouts, system-aware light/dark mode, and reduced-motion support.
 - **PWA:** Original installation icons, offline-readiness status, and a user-controlled update prompt.
 
-Starter content includes **32 flashcards, 40 quiz questions, and 8 coding exercises** across:
+Study content includes **120 flashcards, 40 quiz questions, and 8 coding exercises** across:
 
 1. Python Fundamentals
 2. Python Functions
@@ -68,6 +69,8 @@ wwwroot\
   data\flashcards.json          Flashcard catalog
   data\quizzes.json             Multiple-choice question catalog
   data\coding-exercises.json    Coding exercise catalog
+  data\python_algorithm_library.json  Algorithm reference lessons
+  js\algorithms.js             Safe Python highlighting and clipboard support
   js\progress.js               Local storage and backup-download interop
   js\pwa.js                    Offline status and update coordination
   icon.svg                     Editable source for installation icons
@@ -102,6 +105,16 @@ For example, a flashcard entry looks like:
   "back": "6\n\nlen returns the number of characters in this string."
 }
 ```
+
+### Algorithm reference lessons
+
+Edit `wwwroot\data\python_algorithm_library.json` to add or change library lessons. The original supplied file is preserved, including all example code and indentation. It uses a catalog object with `schemaVersion: 1`, a `title`, and an `algorithms` array.
+
+Each lesson needs a stable URL-safe `id`, a unique positive `order`, `category`, `title`, `difficulty` (`Beginner`, `Intermediate`, or `Advanced`), `language: "python"`, `summary`, `whenToUse`, `code`, `exampleInput`, `walkthrough`, `timeComplexity`, `spaceComplexity`, `complexityExplanation`, and `commonMistakes`. The walkthrough and mistakes are nonempty string arrays. Code is reference text only and is never executed.
+
+Lesson URLs use `/practice/algorithms/{id}`. The hosting rules include these routes; the existing published worker caches the JSON and highlighting module along with the app. Offline access still requires successful caching on a host that preserves the published files. The current Netlify branding-injection limitation also applies to this library.
+
+Copy code requires browser clipboard permission; when blocked, the code is selected for manual copying. Library reading does not change quiz scores, flashcard scheduling, or study streaks. Optional bookmarks/read history are not implemented.
 
 ## Progress and review rules
 
@@ -171,16 +184,22 @@ Applying an update pauses interaction and waits for pending progress writes befo
 
 Changing the site's address, clearing website data, or reinstalling can affect local storage. Export a backup first; ordinary updates at the same address do not reset saved progress.
 
-### Hosting requirements
+### Upload to Cloudflare Pages
 
-The hosting provider has deliberately not been selected. No provider-specific files or deployed resources are included yet. Before deployment, configure:
+1. Run the publish command above.
+2. Sign in to `https://dash.cloudflare.com` and open **Workers & Pages**. Select **Create application**, choose **Pages**, and use the direct-upload / **Drag and drop your files** option.
+3. In Windows File Explorer, open `bin\Release\net10.0\publish`.
+4. Enter a project name such as `python-study-companion`, drag its **wwwroot** folder onto the upload area, and select **Deploy site**. Do not upload the source `wwwroot` at the project root.
+5. Open the project's production address ending in `.pages.dev`. Wait for **Ready for offline study**.
+6. Open that same address in Safari on the iPhone and follow the checklist below.
 
-- HTTPS and a stable site address.
-- SPA navigation fallback without rewriting missing static assets to HTML.
-- Revalidation for `index.html`, `service-worker.js`, and `service-worker-assets.js`; deploy each complete published output together.
-- Host-appropriate security headers, checked against the published WebAssembly app.
+The published folder includes `_redirects` for the current application routes and `_headers` for HTTP cache revalidation and basic response headers. Missing static assets are not rewritten to HTML. When adding a new page route, add it to `_redirects` too. Deploy at the site's root, not in a subfolder.
 
-Do not upload source files, `obj`, or development configuration: publish only the generated `wwwroot` contents. Provider-specific routing, cache rules, and headers will be added after hosting is chosen.
+For future releases, publish again and choose **Create a new deployment** in the **same Pages project**, selecting the production environment. Keep the same production address so saved progress remains associated with it. Verify direct navigation to `/practice/quiz` after upload.
+
+Netlify was initially tried, but its injected **Powered by Netlify** badge changed `index.html` and broke offline integrity checks. Cloudflare Pages is the selected alternative; do not disable integrity validation to work around HTML injection. When moving from the old Netlify address, export any existing progress and import it on the new address.
+
+Do not upload source files, `obj`, or development configuration: publish only the generated `wwwroot` contents. No account credentials or automated deployment tools are required in this repository.
 
 ### Physical-iPhone checklist
 
@@ -194,4 +213,4 @@ A desktop browser check does not replace these real-device checks. After HTTPS d
 6. Reconnect and publish another release at the same address. Confirm the update prompt, **Later**, and **Reload to update**. Verify saved progress survives and the updated version reopens offline.
 7. If Safari and the home-screen app show different progress, export from the instance containing your records and import into the intended one. Do not assume storage is shared between browser contexts.
 
-Hosting/deployment and completion of this checklist remain the final release steps.
+Uploading to Cloudflare Pages, checking the live site's routing/headers, and completing this checklist remain the final release steps.

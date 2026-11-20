@@ -1,0 +1,466 @@
+{
+  "schemaVersion": 1,
+  "title": "Python Algorithm Library",
+  "algorithms": [
+    {
+      "id": "alg-001",
+      "order": 1,
+      "category": "Hashing",
+      "title": "HashSet: Detect Duplicates",
+      "difficulty": "Beginner",
+      "language": "python",
+      "summary": "Keep a set of values already seen.",
+      "whenToUse": "Checking duplicates or membership efficiently.",
+      "code": "def contains_duplicate(nums):\n    seen = set()\n    for num in nums:\n        if num in seen:\n            return True\n        seen.add(num)\n    return False\n\nprint(contains_duplicate([3, 1, 4, 1]))  # True\n",
+      "exampleInput": "See runnable example at bottom of code",
+      "walkthrough": [
+        "Start with an empty set.",
+        "Add 3, 1, and 4.",
+        "The next 1 is already present, so return True."
+      ],
+      "timeComplexity": "O(n) average",
+      "spaceComplexity": "O(n)",
+      "complexityExplanation": "Each membership check and insertion is O(1) on average.",
+      "commonMistakes": [
+        "Do not use a list for repeated membership checks."
+      ]
+    },
+    {
+      "id": "alg-002",
+      "order": 2,
+      "category": "Hashing",
+      "title": "Dictionary: Frequency Counting",
+      "difficulty": "Beginner",
+      "language": "python",
+      "summary": "Count how often each value appears.",
+      "whenToUse": "Anagrams, counts, most frequent items.",
+      "code": "def frequencies(items):\n    counts = {}\n    for item in items:\n        counts[item] = counts.get(item, 0) + 1\n    return counts\n\nprint(frequencies(['a', 'b', 'a']))  # {'a': 2, 'b': 1}\n",
+      "exampleInput": "See runnable example at bottom of code",
+      "walkthrough": [
+        "Start with an empty dictionary.",
+        "For each item, get its current count or zero.",
+        "Increment and store the updated count."
+      ],
+      "timeComplexity": "O(n) average",
+      "spaceComplexity": "O(k)",
+      "complexityExplanation": "n items are processed; k distinct keys are stored.",
+      "commonMistakes": [
+        "Remember to handle a missing key."
+      ]
+    },
+    {
+      "id": "alg-003",
+      "order": 3,
+      "category": "Hashing",
+      "title": "Dictionary: Two Sum",
+      "difficulty": "Beginner",
+      "language": "python",
+      "summary": "Look up the complement needed to reach a target.",
+      "whenToUse": "Finding a pair of indices with a target sum.",
+      "code": "def two_sum(nums, target):\n    seen = {}\n    for i, num in enumerate(nums):\n        complement = target - num\n        if complement in seen:\n            return [seen[complement], i]\n        seen[num] = i\n    return []\n\nprint(two_sum([2, 7, 11, 15], 9))  # [0, 1]\n",
+      "exampleInput": "See runnable example at bottom of code",
+      "walkthrough": [
+        "At 2, the complement 7 has not been seen.",
+        "Store 2 at index 0.",
+        "At 7, complement 2 is found at index 0."
+      ],
+      "timeComplexity": "O(n) average",
+      "spaceComplexity": "O(n)",
+      "complexityExplanation": "One pass with average constant-time dictionary lookups.",
+      "commonMistakes": [
+        "Check before inserting to avoid using one element twice."
+      ]
+    },
+    {
+      "id": "alg-004",
+      "order": 4,
+      "category": "Two Pointers",
+      "title": "Reverse a List In Place",
+      "difficulty": "Beginner",
+      "language": "python",
+      "summary": "Swap elements from the outside inward.",
+      "whenToUse": "Reversing or comparing elements from both ends.",
+      "code": "def reverse_items(items):\n    left, right = 0, len(items) - 1\n    while left < right:\n        items[left], items[right] = items[right], items[left]\n        left += 1\n        right -= 1\n    return items\n\nprint(reverse_items([1, 2, 3, 4]))  # [4, 3, 2, 1]\n",
+      "exampleInput": "See runnable example at bottom of code",
+      "walkthrough": [
+        "Swap first and last.",
+        "Move both pointers inward.",
+        "Stop when pointers meet or cross."
+      ],
+      "timeComplexity": "O(n)",
+      "spaceComplexity": "O(1)",
+      "complexityExplanation": "Each element is touched at most once, using only pointer variables.",
+      "commonMistakes": [
+        "Use left < right, not left <= right."
+      ]
+    },
+    {
+      "id": "alg-005",
+      "order": 5,
+      "category": "Two Pointers",
+      "title": "Sorted Pair Sum",
+      "difficulty": "Beginner",
+      "language": "python",
+      "summary": "Move pointers based on whether the sum is too small or too large.",
+      "whenToUse": "Finding pairs in sorted arrays.",
+      "code": "def has_pair_sum(nums, target):\n    left, right = 0, len(nums) - 1\n    while left < right:\n        total = nums[left] + nums[right]\n        if total == target:\n            return True\n        if total < target:\n            left += 1\n        else:\n            right -= 1\n    return False\n\nprint(has_pair_sum([1, 2, 4, 7, 11], 9))  # True\n",
+      "exampleInput": "See runnable example at bottom of code",
+      "walkthrough": [
+        "Start with 1 and 11: 12 is too large.",
+        "Move right to 7: 1 + 7 = 8, too small.",
+        "Move left to 2: 2 + 7 = 9."
+      ],
+      "timeComplexity": "O(n)",
+      "spaceComplexity": "O(1)",
+      "complexityExplanation": "Each pointer only moves inward, at most n steps in total.",
+      "commonMistakes": [
+        "This pointer movement requires sorted input."
+      ]
+    },
+    {
+      "id": "alg-006",
+      "order": 6,
+      "category": "Sliding Window",
+      "title": "Maximum Fixed Window Sum",
+      "difficulty": "Beginner",
+      "language": "python",
+      "summary": "Reuse the previous window sum when sliding.",
+      "whenToUse": "Best total across k consecutive values.",
+      "code": "def max_window_sum(nums, k):\n    if k < 1 or k > len(nums):\n        raise ValueError('k must be between 1 and len(nums)')\n    current = sum(nums[:k])\n    best = current\n    for right in range(k, len(nums)):\n        current += nums[right] - nums[right - k]\n        best = max(best, current)\n    return best\n\nprint(max_window_sum([2, 1, 5, 1, 3, 2], 3))  # 9\n",
+      "exampleInput": "See runnable example at bottom of code",
+      "walkthrough": [
+        "First window 2+1+5 = 8.",
+        "Slide: remove 2, add 1, giving 7.",
+        "Continue and keep the highest sum: 9."
+      ],
+      "timeComplexity": "O(n)",
+      "spaceComplexity": "O(1)",
+      "complexityExplanation": "Each value enters and leaves a running sum at most once.",
+      "commonMistakes": [
+        "Validate k; subtract the element leaving the window."
+      ]
+    },
+    {
+      "id": "alg-007",
+      "order": 7,
+      "category": "Sliding Window",
+      "title": "Longest Substring Without Repeats",
+      "difficulty": "Intermediate",
+      "language": "python",
+      "summary": "Expand a window and move its left edge past repeated characters.",
+      "whenToUse": "Longest contiguous substring with unique characters.",
+      "code": "def longest_unique(text):\n    last_seen = {}\n    left = 0\n    best = 0\n    for right, char in enumerate(text):\n        if char in last_seen and last_seen[char] >= left:\n            left = last_seen[char] + 1\n        last_seen[char] = right\n        best = max(best, right - left + 1)\n    return best\n\nprint(longest_unique('abcabcbb'))  # 3\n",
+      "exampleInput": "See runnable example at bottom of code",
+      "walkthrough": [
+        "Grow the window while characters are unique.",
+        "When a character repeats inside the window, move left.",
+        "Track the maximum window length."
+      ],
+      "timeComplexity": "O(n) average",
+      "spaceComplexity": "O(k)",
+      "complexityExplanation": "Each character is processed once; k distinct characters may be stored.",
+      "commonMistakes": [
+        "Never move left backward; check last_seen[char] >= left."
+      ]
+    },
+    {
+      "id": "alg-008",
+      "order": 8,
+      "category": "Searching",
+      "title": "Linear Search",
+      "difficulty": "Beginner",
+      "language": "python",
+      "summary": "Check items one at a time.",
+      "whenToUse": "Small or unsorted collections.",
+      "code": "def linear_search(nums, target):\n    for i, num in enumerate(nums):\n        if num == target:\n            return i\n    return -1\n\nprint(linear_search([8, 3, 9], 3))  # 1\n",
+      "exampleInput": "See runnable example at bottom of code",
+      "walkthrough": [
+        "Check index 0: 8 is not 3.",
+        "Check index 1: 3 matches.",
+        "Return index 1."
+      ],
+      "timeComplexity": "O(n)",
+      "spaceComplexity": "O(1)",
+      "complexityExplanation": "In the worst case all n elements must be examined.",
+      "commonMistakes": [
+        "Return -1 after the loop, not inside it."
+      ]
+    },
+    {
+      "id": "alg-009",
+      "order": 9,
+      "category": "Searching",
+      "title": "Binary Search",
+      "difficulty": "Intermediate",
+      "language": "python",
+      "summary": "Repeatedly discard half of a sorted search range.",
+      "whenToUse": "Fast lookup in sorted arrays.",
+      "code": "def binary_search(nums, target):\n    left, right = 0, len(nums) - 1\n    while left <= right:\n        mid = (left + right) // 2\n        if nums[mid] == target:\n            return mid\n        if nums[mid] < target:\n            left = mid + 1\n        else:\n            right = mid - 1\n    return -1\n\nprint(binary_search([1, 3, 5, 7, 9], 7))  # 3\n",
+      "exampleInput": "See runnable example at bottom of code",
+      "walkthrough": [
+        "Inspect midpoint 5.",
+        "7 is larger, so discard the left half.",
+        "Inspect 7 and return index 3."
+      ],
+      "timeComplexity": "O(log n)",
+      "spaceComplexity": "O(1)",
+      "complexityExplanation": "The remaining search interval is halved each iteration.",
+      "commonMistakes": [
+        "Input must be sorted; update bounds past mid."
+      ]
+    },
+    {
+      "id": "alg-010",
+      "order": 10,
+      "category": "Sorting",
+      "title": "Insertion Sort",
+      "difficulty": "Beginner",
+      "language": "python",
+      "summary": "Insert each value into the sorted portion before it.",
+      "whenToUse": "Learning sorting; nearly sorted small arrays.",
+      "code": "def insertion_sort(nums):\n    nums = nums.copy()\n    for i in range(1, len(nums)):\n        value = nums[i]\n        j = i - 1\n        while j >= 0 and nums[j] > value:\n            nums[j + 1] = nums[j]\n            j -= 1\n        nums[j + 1] = value\n    return nums\n\nprint(insertion_sort([5, 2, 4, 1]))  # [1, 2, 4, 5]\n",
+      "exampleInput": "See runnable example at bottom of code",
+      "walkthrough": [
+        "Treat the first element as sorted.",
+        "Shift larger values right to make space.",
+        "Insert the current value into its sorted position."
+      ],
+      "timeComplexity": "O(n\u00b2) worst; O(n) best",
+      "spaceComplexity": "O(n) for copied input",
+      "complexityExplanation": "Nested shifts can take quadratic time; this version copies input first.",
+      "commonMistakes": [
+        "The copy uses O(n) memory; in-place insertion sort uses O(1)."
+      ]
+    },
+    {
+      "id": "alg-011",
+      "order": 11,
+      "category": "Sorting",
+      "title": "Merge Sort",
+      "difficulty": "Intermediate",
+      "language": "python",
+      "summary": "Split an array, sort halves, and merge them.",
+      "whenToUse": "Reliable O(n log n) sorting.",
+      "code": "def merge_sort(nums):\n    if len(nums) <= 1:\n        return nums\n    mid = len(nums) // 2\n    left = merge_sort(nums[:mid])\n    right = merge_sort(nums[mid:])\n    result = []\n    i = j = 0\n    while i < len(left) and j < len(right):\n        if left[i] <= right[j]:\n            result.append(left[i]); i += 1\n        else:\n            result.append(right[j]); j += 1\n    return result + left[i:] + right[j:]\n\nprint(merge_sort([5, 2, 4, 1]))  # [1, 2, 4, 5]\n",
+      "exampleInput": "See runnable example at bottom of code",
+      "walkthrough": [
+        "Split [5,2,4,1] into halves.",
+        "Recursively sort each half.",
+        "Merge sorted halves by taking the smaller front element."
+      ],
+      "timeComplexity": "O(n log n)",
+      "spaceComplexity": "O(n log n) in this sliced implementation",
+      "complexityExplanation": "Halving creates log n levels; slicing and merging allocate data at each level.",
+      "commonMistakes": [
+        "Remember to append leftovers after the merge loop."
+      ]
+    },
+    {
+      "id": "alg-012",
+      "order": 12,
+      "category": "Recursion",
+      "title": "Factorial Recursion",
+      "difficulty": "Beginner",
+      "language": "python",
+      "summary": "Solve a problem using smaller instances of itself.",
+      "whenToUse": "Understanding recursive calls and base cases.",
+      "code": "def factorial(n):\n    if n < 0:\n        raise ValueError('n must be nonnegative')\n    if n <= 1:\n        return 1\n    return n * factorial(n - 1)\n\nprint(factorial(4))  # 24\n",
+      "exampleInput": "See runnable example at bottom of code",
+      "walkthrough": [
+        "factorial(4) becomes 4 * factorial(3).",
+        "Continue until factorial(1) returns 1.",
+        "Multiply results while calls return."
+      ],
+      "timeComplexity": "O(n)",
+      "spaceComplexity": "O(n)",
+      "complexityExplanation": "There are n recursive calls and n stack frames.",
+      "commonMistakes": [
+        "Always define a base case; reject negative inputs."
+      ]
+    },
+    {
+      "id": "alg-013",
+      "order": 13,
+      "category": "Recursion",
+      "title": "Generate Subsets (Backtracking)",
+      "difficulty": "Intermediate",
+      "language": "python",
+      "summary": "Explore include/exclude choices and undo choices afterward.",
+      "whenToUse": "Generating combinations and subsets.",
+      "code": "def subsets(nums):\n    result = []\n    path = []\n    def backtrack(index):\n        if index == len(nums):\n            result.append(path.copy())\n            return\n        backtrack(index + 1)\n        path.append(nums[index])\n        backtrack(index + 1)\n        path.pop()\n    backtrack(0)\n    return result\n\nprint(subsets([1, 2]))  # [[], [2], [1], [1, 2]]\n",
+      "exampleInput": "See runnable example at bottom of code",
+      "walkthrough": [
+        "For each element, first explore excluding it.",
+        "Then include it and explore again.",
+        "Undo the inclusion before returning."
+      ],
+      "timeComplexity": "O(n \u00d7 2^n)",
+      "spaceComplexity": "O(n \u00d7 2^n) including output",
+      "complexityExplanation": "There are 2^n subsets; copying each can take O(n).",
+      "commonMistakes": [
+        "Append path.copy(), not path; undo changes with pop()."
+      ]
+    },
+    {
+      "id": "alg-014",
+      "order": 14,
+      "category": "Trees & Graphs",
+      "title": "Binary Tree DFS (Preorder)",
+      "difficulty": "Intermediate",
+      "language": "python",
+      "summary": "Visit root, then left and right subtrees.",
+      "whenToUse": "Traversing hierarchical data.",
+      "code": "class Node:\n    def __init__(self, value, left=None, right=None):\n        self.value, self.left, self.right = value, left, right\n\ndef preorder(root):\n    if root is None:\n        return []\n    return [root.value] + preorder(root.left) + preorder(root.right)\n\nroot = Node(1, Node(2), Node(3))\nprint(preorder(root))  # [1, 2, 3]\n",
+      "exampleInput": "See runnable example at bottom of code",
+      "walkthrough": [
+        "Visit root 1.",
+        "Traverse left subtree containing 2.",
+        "Traverse right subtree containing 3."
+      ],
+      "timeComplexity": "O(n)",
+      "spaceComplexity": "O(n) including output",
+      "complexityExplanation": "Every node is visited; output stores n values.",
+      "commonMistakes": [
+        "Check for None before reading node fields."
+      ]
+    },
+    {
+      "id": "alg-015",
+      "order": 15,
+      "category": "Trees & Graphs",
+      "title": "Binary Tree BFS (Level Order)",
+      "difficulty": "Intermediate",
+      "language": "python",
+      "summary": "Use a queue to visit nodes level by level.",
+      "whenToUse": "Shortest levels and breadth-first traversal.",
+      "code": "from collections import deque\n\nclass Node:\n    def __init__(self, value, left=None, right=None):\n        self.value, self.left, self.right = value, left, right\n\ndef level_order(root):\n    if root is None:\n        return []\n    queue = deque([root])\n    result = []\n    while queue:\n        node = queue.popleft()\n        result.append(node.value)\n        if node.left: queue.append(node.left)\n        if node.right: queue.append(node.right)\n    return result\n\nprint(level_order(Node(1, Node(2), Node(3))))  # [1, 2, 3]\n",
+      "exampleInput": "See runnable example at bottom of code",
+      "walkthrough": [
+        "Queue starts with root 1.",
+        "Remove 1, then enqueue 2 and 3.",
+        "Process 2 and 3 in FIFO order."
+      ],
+      "timeComplexity": "O(n)",
+      "spaceComplexity": "O(n)",
+      "complexityExplanation": "Each node is queued and processed once.",
+      "commonMistakes": [
+        "Use deque.popleft(), not list.pop(0)."
+      ]
+    },
+    {
+      "id": "alg-016",
+      "order": 16,
+      "category": "Trees & Graphs",
+      "title": "Graph DFS",
+      "difficulty": "Intermediate",
+      "language": "python",
+      "summary": "Explore neighbors deeply and track visited nodes.",
+      "whenToUse": "Connectivity and graph exploration.",
+      "code": "def graph_dfs(graph, start):\n    visited = set()\n    order = []\n    def visit(node):\n        if node in visited:\n            return\n        visited.add(node)\n        order.append(node)\n        for neighbor in graph.get(node, []):\n            visit(neighbor)\n    visit(start)\n    return order\n\ngraph = {'A': ['B', 'C'], 'B': ['D'], 'C': [], 'D': []}\nprint(graph_dfs(graph, 'A'))  # ['A', 'B', 'D', 'C']\n",
+      "exampleInput": "See runnable example at bottom of code",
+      "walkthrough": [
+        "Visit A, then follow B.",
+        "From B, visit D.",
+        "Backtrack to A and visit C."
+      ],
+      "timeComplexity": "O(V + E)",
+      "spaceComplexity": "O(V)",
+      "complexityExplanation": "Each reachable vertex and edge is explored once.",
+      "commonMistakes": [
+        "Use a visited set to prevent infinite cycles."
+      ]
+    },
+    {
+      "id": "alg-017",
+      "order": 17,
+      "category": "Trees & Graphs",
+      "title": "Graph BFS Shortest Path",
+      "difficulty": "Intermediate",
+      "language": "python",
+      "summary": "Explore an unweighted graph by distance from the start.",
+      "whenToUse": "Fewest-edge paths in unweighted graphs.",
+      "code": "from collections import deque\n\ndef shortest_path(graph, start, goal):\n    queue = deque([(start, [start])])\n    visited = {start}\n    while queue:\n        node, path = queue.popleft()\n        if node == goal:\n            return path\n        for neighbor in graph.get(node, []):\n            if neighbor not in visited:\n                visited.add(neighbor)\n                queue.append((neighbor, path + [neighbor]))\n    return []\n\ngraph = {'A': ['B', 'C'], 'B': ['D'], 'C': ['D'], 'D': []}\nprint(shortest_path(graph, 'A', 'D'))  # ['A', 'B', 'D']\n",
+      "exampleInput": "See runnable example at bottom of code",
+      "walkthrough": [
+        "Queue starts with A.",
+        "Enqueue B and C at distance 1.",
+        "Explore B and discover D at distance 2."
+      ],
+      "timeComplexity": "O(V\u00b2 + VE) worst for copied paths",
+      "spaceComplexity": "O(V\u00b2) worst for copied paths",
+      "complexityExplanation": "Copying a full path for each enqueue adds overhead; parent pointers improve to O(V+E).",
+      "commonMistakes": [
+        "Mark visited when enqueuing; BFS requires unweighted edges for fewest-edge paths."
+      ]
+    },
+    {
+      "id": "alg-018",
+      "order": 18,
+      "category": "Dynamic Programming",
+      "title": "Climbing Stairs",
+      "difficulty": "Intermediate",
+      "language": "python",
+      "summary": "Build answers from two smaller subproblems.",
+      "whenToUse": "Counting paths or sequences with overlapping subproblems.",
+      "code": "def climb_stairs(n):\n    if n < 0:\n        raise ValueError('n must be nonnegative')\n    a, b = 1, 1\n    for _ in range(n):\n        a, b = b, a + b\n    return a\n\nprint(climb_stairs(4))  # 5\n",
+      "exampleInput": "See runnable example at bottom of code",
+      "walkthrough": [
+        "For 0 or 1 step there is one way.",
+        "Each new total combines the previous two totals.",
+        "For 4 steps, there are 5 ways."
+      ],
+      "timeComplexity": "O(n)",
+      "spaceComplexity": "O(1)",
+      "complexityExplanation": "Each step uses one update and two running values.",
+      "commonMistakes": [
+        "Define what n=0 means; this example returns 1."
+      ]
+    },
+    {
+      "id": "alg-019",
+      "order": 19,
+      "category": "Dynamic Programming",
+      "title": "Coin Change: Minimum Coins",
+      "difficulty": "Advanced",
+      "language": "python",
+      "summary": "Compute the best solution for every smaller amount.",
+      "whenToUse": "Optimization with overlapping subproblems.",
+      "code": "def min_coins(coins, amount):\n    if amount < 0 or any(c <= 0 for c in coins):\n        raise ValueError('amount >= 0 and positive coins required')\n    dp = [amount + 1] * (amount + 1)\n    dp[0] = 0\n    for total in range(1, amount + 1):\n        for coin in coins:\n            if coin <= total:\n                dp[total] = min(dp[total], dp[total - coin] + 1)\n    return -1 if dp[amount] > amount else dp[amount]\n\nprint(min_coins([1, 3, 4], 6))  # 2\n",
+      "exampleInput": "See runnable example at bottom of code",
+      "walkthrough": [
+        "dp[0] = 0; other amounts start unreachable.",
+        "For each amount, try every allowed coin.",
+        "At 6, using 3+3 gives 2 coins."
+      ],
+      "timeComplexity": "O(amount \u00d7 number of coins)",
+      "spaceComplexity": "O(amount)",
+      "complexityExplanation": "The table has amount+1 entries; each tests all coin denominations.",
+      "commonMistakes": [
+        "Use an unreachable sentinel and return -1 when no solution exists."
+      ]
+    },
+    {
+      "id": "alg-020",
+      "order": 20,
+      "category": "Heaps",
+      "title": "Find K Largest Values",
+      "difficulty": "Intermediate",
+      "language": "python",
+      "summary": "Get the k largest numbers with a heap.",
+      "whenToUse": "Top-k rankings and streaming data.",
+      "code": "import heapq\n\ndef k_largest(nums, k):\n    if k < 0:\n        raise ValueError('k must be nonnegative')\n    return heapq.nlargest(k, nums)\n\nprint(k_largest([5, 1, 9, 3], 2))  # [9, 5]\n",
+      "exampleInput": "See runnable example at bottom of code",
+      "walkthrough": [
+        "Select the top k values.",
+        "A heap maintains candidate values.",
+        "Return 9 and 5."
+      ],
+      "timeComplexity": "O(n log k) for 1 <= k <= n",
+      "spaceComplexity": "O(k)",
+      "complexityExplanation": "A heap of size k tracks the largest values.",
+      "commonMistakes": [
+        "Check k for negative values."
+      ]
+    }
+  ]
+}
